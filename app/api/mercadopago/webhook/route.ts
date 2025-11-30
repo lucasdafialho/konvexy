@@ -163,12 +163,12 @@ export async function POST(request: NextRequest) {
 
     console.log('🎯 Plano:', planType, 'para:', email)
 
-    // 9. Buscar usuário
+    // 9. Buscar usuário (case-insensitive)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('id, email, plan')
-      .eq('email', email)
-      .single()
+      .ilike('email', email)
+      .maybeSingle()
 
     if (profileError || !profile) {
       console.error('❌ Usuário não encontrado:', email, profileError?.message)
