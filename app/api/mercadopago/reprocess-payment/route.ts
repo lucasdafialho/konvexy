@@ -125,10 +125,15 @@ export async function POST(request: NextRequest) {
 
     if (profileError || !profile) {
       console.error('❌ Usuário não encontrado:', email)
+      
+      // Mostrar email real para debug
+      const emailLower = email.toLowerCase().trim()
       return NextResponse.json({ 
         error: "Usuário não encontrado",
-        email: email,
-        details: profileError?.message
+        email_from_mp: email,
+        email_normalized: emailLower,
+        details: profileError?.message,
+        hint: "Verifique se este email está cadastrado na tabela profiles"
       }, { status: 404 })
     }
 
