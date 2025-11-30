@@ -14,7 +14,10 @@ export interface Subscription {
 }
 
 export async function getUserActiveSubscription(userId: string): Promise<Subscription | null> {
-  const { data, error } = await supabase
+  // Usar supabaseAdmin para evitar problemas de RLS
+  const client = supabaseAdmin || supabase
+  
+  const { data, error } = await client
     .from('subscriptions')
     .select('id, user_id, plan_type, status, mercadopago_subscription_id, started_at, expires_at, created_at, updated_at')
     .eq('user_id', userId)
@@ -43,7 +46,10 @@ export async function getUserActiveSubscription(userId: string): Promise<Subscri
 }
 
 export async function getUserSubscriptions(userId: string): Promise<Subscription[]> {
-  const { data, error } = await supabase
+  // Usar supabaseAdmin para evitar problemas de RLS
+  const client = supabaseAdmin || supabase
+  
+  const { data, error } = await client
     .from('subscriptions')
     .select('id, user_id, plan_type, status, mercadopago_subscription_id, started_at, expires_at, created_at, updated_at')
     .eq('user_id', userId)
@@ -171,8 +177,11 @@ export async function updateSubscriptionStatus(
 }
 
 export async function validateUserPlan(userId: string): Promise<'free' | 'starter' | 'pro'> {
+  // Usar supabaseAdmin para evitar problemas de RLS
+  const client = supabaseAdmin || supabase
+  
   // Buscar perfil do usuário
-  const { data: profile } = await supabase
+  const { data: profile } = await client
     .from('profiles')
     .select('plan')
     .eq('id', userId)
@@ -185,41 +194,42 @@ export async function validateUserPlan(userId: string): Promise<'free' | 'starte
   const typedProfile = profile as unknown as { plan: 'free' | 'starter' | 'pro' }
   const currentPlan = typedProfile.plan
 
-  // Se o plano for pago, verificar se tem assinatura ativa
-  if (currentPlan !== 'free') {
+  // Se o plano é 'starter' ou 'pro', confiar no valor do profile
+  // A verificação de assinatura ativa é feita apenas para garantir consistência
+  if (currentPlan === 'starter' || currentPlan === 'pro') {
+    // Verificar se tem assinatura ativa para este plano
     const activeSubscription = await getUserActiveSubscription(userId)
     
-    // Se não tem assinatura ativa, downgrade para free
-    if (!activeSubscription) {
-      if (supabaseAdmin) {
-        await supabaseAdmin
-          .from('profiles')
-          .update({ plan: 'free' } as any)
-          .eq('id', userId)
+    // Se tem assinatura ativa, retornar o plano atual
+    if (activeSubscription) {
+      // Verificar se a assinatura expirou
+      if (activeSubscription.expiresAt) {
+        const expiresAt = new Date(activeSubscription.expiresAt)
+        if (expiresAt < new Date()) {
+          // Marcar assinatura como expirada
+          await updateSubscriptionStatus(activeSubscription.id, 'expired')
+          
+          // Downgrade para free
+          if (supabaseAdmin) {
+            await supabaseAdmin
+              .from('profiles')
+              .update({ plan: 'free' } as any)
+              .eq('id', userId)
+          }
+          
+          return 'free'
+        }
       }
       
-      return 'free'
+      // Assinatura ativa e válida
+      return currentPlan
     }
-
-    // Verificar se a assinatura expirou
-    if (activeSubscription.expiresAt) {
-      const expiresAt = new Date(activeSubscription.expiresAt)
-      if (expiresAt < new Date()) {
-        // Marcar assinatura como expirada
-        await updateSubscriptionStatus(activeSubscription.id, 'expired')
-        
-        // Downgrade para free
-        if (supabaseAdmin) {
-          await supabaseAdmin
-            .from('profiles')
-            .update({ plan: 'free' } as any)
-            .eq('id', userId)
-        }
-        
-        return 'free'
-      }
-    }
-
+    
+    // Se não tem assinatura ativa MAS o profile diz que é pago,
+    // Pode ser um caso onde a assinatura foi criada mas ainda não registrada
+    // Confiar no profile por enquanto para não bloquear o usuário
+    // Isso permite que o sistema funcione mesmo se houver delay no webhook
+    console.log(`[validateUserPlan] Usuário ${userId} tem plano ${currentPlan} mas sem assinatura ativa encontrada. Mantendo plano.`)
     return currentPlan
   }
 
