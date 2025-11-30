@@ -143,12 +143,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true, status: payment.status })
     }
 
-    // 7. Validar email
-    const email = payment.payer?.email
-    if (!email) {
-      console.error('❌ Email não encontrado')
-      return NextResponse.json({ error: "No email" }, { status: 400 })
+    // 7. Validar email - tentar múltiplas fontes
+    // O Mercado Pago pode mascarar o email como XXXXXXXXXXX
+    let email = payment.metadata?.user_email || payment.payer?.email
+    
+    if (!email || email === 'XXXXXXXXXXX' || email.includes('XXXX')) {
+      console.error('❌ Email mascarado ou não encontrado')
+      console.log('Metadata:', payment.metadata)
+      console.log('External Reference:', payment.external_reference)
+      
+      // Tentar metadata
+      if (payment.metadata?.user_email) {
+        email = payment.metadata.user_email
+      }
     }
+    
+    if (!email || email === 'XXXXXXXXXXX') {
+      console.error('❌ Email definitivamente não encontrado')
+      return NextResponse.json({ error: "Email mascarado" }, { status: 400 })
+    }
+    
+    console.log('📧 Email encontrado:', email)
 
     // 8. Identificar plano
     let planType = "starter"

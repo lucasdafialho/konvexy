@@ -24,11 +24,13 @@ export async function GET() {
     usage: "POST /api/mercadopago/reprocess-payment",
     body: {
       payment_id: "ID do pagamento do MercadoPago (obrigatório)",
-      secret: "Chave secreta para autorização (obrigatório)"
+      secret: "Chave secreta para autorização (obrigatório)",
+      email: "Email do usuário (opcional, usar se o MP mascarar o email)"
     },
     example: {
       payment_id: "135269792611",
-      secret: "sua-chave-secreta"
+      secret: "sua-chave-secreta",
+      email: "usuario@email.com"
     }
   })
 }
@@ -39,7 +41,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { payment_id, secret } = body
+    const { payment_id, secret, email: manualEmail } = body
 
     // Validar secret (usar a mesma chave do webhook)
     const expectedSecret = process.env.MERCADOPAGO_WEBHOOK_SECRET
@@ -91,11 +93,35 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Validar email
-    const email = payment.payer?.email
-    if (!email) {
-      return NextResponse.json({ error: "Email do pagador não encontrado" }, { status: 400 })
+    // Validar email - tentar múltiplas fontes
+    // 0. Email fornecido manualmente (prioridade máxima)
+    // 1. metadata.user_email (mais confiável, definido por nós)
+    // 2. payer.email (pode estar mascarado como XXXXXXXXXXX)
+    let email = manualEmail || payment.metadata?.user_email || payment.payer?.email
+    
+    // Se o email está mascarado, tentar extrair do external_reference ou metadata
+    if (!email || email === 'XXXXXXXXXXX' || email.includes('XXXX')) {
+      console.log('⚠️ Email mascarado, buscando alternativas...')
+      console.log('Metadata:', payment.metadata)
+      console.log('External Reference:', payment.external_reference)
+      
+      // Tentar metadata
+      if (payment.metadata?.user_email) {
+        email = payment.metadata.user_email
+      }
+      
+      if (!email || email === 'XXXXXXXXXXX') {
+        return NextResponse.json({ 
+          error: "Email do pagador mascarado pelo MercadoPago",
+          hint: "Forneça o email manualmente no campo 'email'",
+          usage: "Adicione '\"email\":\"usuario@email.com\"' no body da requisição",
+          metadata: payment.metadata,
+          external_reference: payment.external_reference
+        }, { status: 400 })
+      }
     }
+    
+    console.log('📧 Email encontrado:', email)
 
     // Identificar plano
     let planType = "starter"
