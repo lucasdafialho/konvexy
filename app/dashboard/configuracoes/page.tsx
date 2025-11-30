@@ -405,21 +405,25 @@ export default function ConfiguracoesPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold">Plano {getPlanName(settings?.profile.plan || 'free')}</h3>
-                      {settings?.subscription?.status === 'active' ? (
-                        <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">ATIVO</Badge>
-                      ) : settings?.subscription?.status === 'cancelled' ? (
-                        <Badge variant="outline">CANCELADO</Badge>
-                      ) : settings?.subscription?.status === 'expired' ? (
-                        <Badge variant="destructive">EXPIRADO</Badge>
+                      {settings?.profile.plan === 'pro' || settings?.profile.plan === 'starter' ? (
+                        settings?.subscription?.status === 'active' ? (
+                          <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">ATIVO</Badge>
+                        ) : settings?.subscription?.status === 'cancelled' ? (
+                          <Badge variant="outline">CANCELADO</Badge>
+                        ) : settings?.subscription?.status === 'expired' ? (
+                          <Badge variant="destructive">EXPIRADO</Badge>
+                        ) : (
+                          <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">ATIVO</Badge>
+                        )
                       ) : (
                         <Badge variant="secondary">GRATUITO</Badge>
                       )}
                     </div>
                     <p className="text-sm text-slate-600">
-                      {settings?.subscription ? (
+                      {settings?.profile.plan !== 'free' ? (
                         <>
                           {getPlanPrice(settings.profile.plan)}/mês
-                          {getDaysUntilExpiration() !== null && ` • Renovação em ${getDaysUntilExpiration()} dias`}
+                          {settings?.subscription && getDaysUntilExpiration() !== null && ` • Renovação em ${getDaysUntilExpiration()} dias`}
                         </>
                       ) : (
                         'Sem assinatura ativa'

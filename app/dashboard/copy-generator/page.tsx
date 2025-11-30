@@ -523,18 +523,18 @@ export default function CopyGeneratorPage() {
                   <div className="flex justify-between text-base">
                     <span className="font-medium text-muted-foreground">Copies geradas</span>
                     <span className="font-bold text-foreground">
-                      {user?.plan === "pro" ? "Ilimitado" : `${history.length}/100`}
+                      {user?.plan === "pro" ? "Ilimitado" : user?.plan === "starter" ? `${used}/${limit}` : `${used}/${limit}`}
                     </span>
                   </div>
-                  {user?.plan === "starter" && (
+                  {user?.plan !== "pro" && limit > 0 && (
                     <div className="w-full bg-accent rounded-full h-3">
                       <div
                         className="bg-primary h-3 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min((history.length / 100) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((used / limit) * 100, 100)}%` }}
                       />
                     </div>
                   )}
-                  {user?.plan === "starter" && history.length > 80 && (
+                  {user?.plan === "starter" && used > (limit * 0.8) && (
                     <div className="flex items-center space-x-2 text-sm text-primary bg-accent p-3 rounded-lg">
                       <CheckCircle className="w-4 h-4" />
                       <span>Considere fazer upgrade para Pro para copies ilimitadas</span>

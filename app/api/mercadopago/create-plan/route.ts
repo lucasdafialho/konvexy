@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     
     const isLocalhost = appUrl.includes("localhost")
     const backUrl = isLocalhost 
-      ? "https://konvexy.com/dashboard?payment=success"
+      ? "https://www.konvexy.com.br/dashboard?payment=success"
       : `${appUrl}/dashboard?payment=success`
 
     const plan = await mp.createPlan({

@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     
     const isLocalhost = appUrl.includes("localhost")
     const backUrl = isLocalhost 
-      ? "https://konvexy.com/dashboard/planos?subscription=success"
+      ? "https://www.konvexy.com.br/dashboard/planos?subscription=success"
       : `${appUrl}/dashboard/planos?subscription=success`
 
     const planConfig = PLANS[planType as "starter" | "pro"]

@@ -5,37 +5,46 @@ import { useCSRF } from "@/hooks/use-csrf"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Check, Zap, Crown, Loader2, Sparkles, Shield, TrendingUp } from "lucide-react"
+import { Check, Zap, Crown, Loader2, Sparkles, Shield, TrendingUp, PartyPopper } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { PLANS } from "@/lib/mercadopago"
 import { useSearchParams, useRouter } from "next/navigation"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
-function SearchParamsEffect({ onPaymentApproved, onSubscriptionSuccess }: { onPaymentApproved: (paymentId: string) => void; onSubscriptionSuccess: () => void }) {
+function SearchParamsEffect({ onPaymentApproved, onSubscriptionSuccess, onPaymentSuccess }: { onPaymentApproved: (paymentId: string) => void; onSubscriptionSuccess: () => void; onPaymentSuccess: () => void }) {
   const searchParams = useSearchParams()
 
   useEffect(() => {
     const subscriptionSuccess = searchParams.get("subscription")
     const paymentId = searchParams.get("payment_id")
     const paymentStatus = searchParams.get("status")
+    const paymentSuccess = searchParams.get("payment")
 
+    // Quando retorna do Mercado Pago com payment_id e status approved
     if (paymentId && paymentStatus === "approved") {
       onPaymentApproved(paymentId)
+    }
+    // Quando retorna com ?payment=success (URL de sucesso configurada no Mercado Pago)
+    else if (paymentSuccess === "success") {
+      onPaymentSuccess()
     }
 
     if (subscriptionSuccess === "success") {
       onSubscriptionSuccess()
     }
-  }, [searchParams, onPaymentApproved, onSubscriptionSuccess])
+  }, [searchParams, onPaymentApproved, onSubscriptionSuccess, onPaymentSuccess])
 
   return null
 }
 
 export default function PlanosPage() {
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, isLoading: authLoading, refreshUser } = useAuth()
   const { token: csrfToken } = useCSRF()
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [isNewUser, setIsNewUser] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [approvedPlan, setApprovedPlan] = useState<string | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -49,14 +58,22 @@ export default function PlanosPage() {
       if (response.ok) {
         const data = await response.json()
         if (data.status === "approved") {
+          setApprovedPlan(data.planType || 'starter')
+          setShowSuccessModal(true)
           setIsNewUser(true)
+          
+          // Atualizar dados do usuário
+          await refreshUser()
+          
           const userData = localStorage.getItem("marketpro_user")
           if (userData) {
             const user = JSON.parse(userData)
             user.plan = data.planType
             localStorage.setItem("marketpro_user", JSON.stringify(user))
           }
-          setTimeout(() => { window.location.href = "/dashboard?payment=success" }, 2000)
+          
+          // Limpar URL params
+          window.history.replaceState({}, '', '/dashboard/planos')
         }
       }
     } catch (error) {
@@ -65,8 +82,30 @@ export default function PlanosPage() {
   }
 
   const handleSubscriptionSuccess = () => {
+    setShowSuccessModal(true)
+    setApprovedPlan('starter')
     setIsNewUser(true)
-    setTimeout(() => { window.location.href = "/dashboard?subscription=success" }, 2000)
+    refreshUser()
+    window.history.replaceState({}, '', '/dashboard/planos')
+  }
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false)
+    router.push("/dashboard")
+  }
+
+  // Quando retorna do Mercado Pago com ?payment=success (sem payment_id)
+  const handlePaymentSuccess = async () => {
+    // Mostrar modal enquanto aguarda atualização do webhook
+    setShowSuccessModal(true)
+    setApprovedPlan(user?.plan || 'starter')
+    setIsNewUser(true)
+    
+    // Atualizar dados do usuário
+    await refreshUser()
+    
+    // Limpar URL params
+    window.history.replaceState({}, '', '/dashboard/planos')
   }
 
   const handleSelectPlan = async (planType: "starter" | "pro", paymentType: "subscription" | "single") => {
@@ -165,7 +204,11 @@ export default function PlanosPage() {
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/10" data-animate>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <Suspense>
-          <SearchParamsEffect onPaymentApproved={handlePaymentApproved} onSubscriptionSuccess={handleSubscriptionSuccess} />
+          <SearchParamsEffect 
+            onPaymentApproved={handlePaymentApproved} 
+            onSubscriptionSuccess={handleSubscriptionSuccess}
+            onPaymentSuccess={handlePaymentSuccess}
+          />
         </Suspense>
 
         {isNewUser && (
@@ -423,6 +466,62 @@ export default function PlanosPage() {
         </Card>
       </div>
       </div>
+
+      {/* Modal de Sucesso */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                <PartyPopper className="w-10 h-10 text-white" />
+              </div>
+              <DialogTitle className="text-2xl font-bold text-foreground">
+                🎉 Pagamento Confirmado!
+              </DialogTitle>
+              <DialogDescription className="text-base text-muted-foreground">
+                Obrigado por assinar o plano <span className="font-bold text-primary">{approvedPlan === 'pro' ? 'Pro' : 'Starter'}</span>!
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-xl border border-primary/20">
+              <p className="text-center text-foreground">
+                Sua assinatura está <span className="font-bold text-green-500">ativa</span>! 
+                Agora você tem acesso a todos os recursos do plano.
+              </p>
+            </div>
+            
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-500" />
+                <span>Acesso liberado imediatamente</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-500" />
+                <span>Renovação automática mensal</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-500" />
+                <span>Cancele quando quiser</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <Button 
+              onClick={handleCloseSuccessModal}
+              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white font-bold"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Começar a usar agora!
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              Aproveite sua assinatura e crie copies incríveis! 🚀
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

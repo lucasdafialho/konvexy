@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const isLocalhost = appUrl.includes("localhost")
     const backUrl = isLocalhost
-      ? "https://konvexy.com/dashboard/planos?payment=success"
+      ? "https://www.konvexy.com.br/dashboard/planos?payment=success"
       : `${appUrl}/dashboard/planos?payment=success`
 
     const planConfig = PLANS[planType as "starter" | "pro"]
@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
       },
       back_urls: {
         success: backUrl,
-        failure: `${isLocalhost ? "https://konvexy.com" : appUrl}/dashboard/planos?payment=failed`,
-        pending: `${isLocalhost ? "https://konvexy.com" : appUrl}/dashboard/planos?payment=pending`,
+        failure: `${isLocalhost ? "https://www.konvexy.com.br" : appUrl}/dashboard/planos?payment=failed`,
+        pending: `${isLocalhost ? "https://www.konvexy.com.br" : appUrl}/dashboard/planos?payment=pending`,
       },
       auto_return: "approved",
       payment_methods: {
