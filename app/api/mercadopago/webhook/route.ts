@@ -24,9 +24,31 @@ export async function OPTIONS() {
     status: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, x-signature, x-request-id',
     },
+  })
+}
+
+// Handler GET para diagnóstico
+export async function GET() {
+  const hasSupabaseUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL
+  const hasSupabaseKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY
+  const hasMpToken = !!process.env.MERCADOPAGO_ACCESS_TOKEN
+  const hasMpSecret = !!process.env.MERCADOPAGO_WEBHOOK_SECRET
+  const debugMode = process.env.MERCADOPAGO_WEBHOOK_DEBUG === 'true'
+
+  return NextResponse.json({
+    status: "Webhook ativo",
+    timestamp: new Date().toISOString(),
+    config: {
+      supabase_url: hasSupabaseUrl ? "✅ OK" : "❌ FALTANDO",
+      supabase_service_key: hasSupabaseKey ? "✅ OK" : "❌ FALTANDO",
+      mercadopago_token: hasMpToken ? "✅ OK" : "❌ FALTANDO",
+      mercadopago_secret: hasMpSecret ? "✅ OK" : "❌ FALTANDO",
+      debug_mode: debugMode ? "✅ Ativo" : "❌ Desativado"
+    },
+    ready: hasSupabaseUrl && hasSupabaseKey && hasMpToken
   })
 }
 
