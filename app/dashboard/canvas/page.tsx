@@ -1,9 +1,10 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useCSRF } from "@/hooks/use-csrf"
-import { useGenerations } from "@/hooks/use-generations"
+import { useGenerations, TOOL_NAMES } from "@/hooks/use-generations"
 import { LimitReachedModal } from "@/components/limit-reached-modal"
+import { ToolBlockedModal } from "@/components/tool-blocked-modal"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -27,9 +28,21 @@ type Canvas = {
 
 export default function CanvasPage() {
   const { token: csrfToken } = useCSRF()
-  const { used, limit, canGenerate } = useGenerations()
+  const { used, limit, canGenerate, isToolAllowed, getRequiredPlanForTool, planName } = useGenerations()
   const resultsRef = useRef<HTMLDivElement | null>(null)
   const [showLimitModal, setShowLimitModal] = useState(false)
+  const [showToolBlockedModal, setShowToolBlockedModal] = useState(false)
+  
+  // Verificar se a ferramenta é permitida ao carregar a página
+  const toolAllowed = isToolAllowed('canvas')
+  const requiredPlan = getRequiredPlanForTool('canvas')
+  
+  useEffect(() => {
+    if (!toolAllowed) {
+      setShowToolBlockedModal(true)
+    }
+  }, [toolAllowed])
+  
   const [form, setForm] = useState({
     product: "",
     audience: "",
@@ -47,6 +60,12 @@ export default function CanvasPage() {
 
   const handleGenerate = async () => {
     if (!form.product || !form.audience || !form.offer || !form.objective) return
+    
+    // Verificar se a ferramenta é permitida para o plano
+    if (!toolAllowed) {
+      setShowToolBlockedModal(true)
+      return
+    }
     
     // Verificar limite antes de gerar
     if (!canGenerate) {
@@ -297,8 +316,14 @@ export default function CanvasPage() {
         used={used}
         limit={limit}
       />
+      
+      <ToolBlockedModal
+        isOpen={showToolBlockedModal}
+        onClose={() => setShowToolBlockedModal(false)}
+        toolName={TOOL_NAMES.canvas}
+        requiredPlan={requiredPlan}
+        currentPlan={planName}
+      />
     </div>
   )
 }
-
-

@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useCSRF } from "@/hooks/use-csrf"
-import { useGenerations } from "@/hooks/use-generations"
+import { useGenerations, TOOL_NAMES } from "@/hooks/use-generations"
 import { LimitReachedModal } from "@/components/limit-reached-modal"
+import { ToolBlockedModal } from "@/components/tool-blocked-modal"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -56,9 +57,21 @@ const timeframes = ["7 dias", "14 dias", "30 dias", "60 dias"]
 
 export default function AIToolsPage() {
   const { token: csrfToken } = useCSRF()
-  const { used, limit, canGenerate } = useGenerations()
+  const { used, limit, canGenerate, isToolAllowed, getRequiredPlanForTool, planName } = useGenerations()
   const resultsRef = useRef<HTMLDivElement | null>(null)
   const [showLimitModal, setShowLimitModal] = useState(false)
+  const [showToolBlockedModal, setShowToolBlockedModal] = useState(false)
+  
+  // Verificar se a ferramenta é permitida ao carregar a página
+  const toolAllowed = isToolAllowed('funnel')
+  const requiredPlan = getRequiredPlanForTool('funnel')
+  
+  useEffect(() => {
+    if (!toolAllowed) {
+      setShowToolBlockedModal(true)
+    }
+  }, [toolAllowed])
+  
   const [selectedType, setSelectedType] = useState<string>(funnelTypes[0])
   const [form, setForm] = useState({
     product: "",
@@ -75,6 +88,12 @@ export default function AIToolsPage() {
 
   const handleGenerate = async () => {
     if (!form.product || !form.audience || !form.offer) return
+    
+    // Verificar se a ferramenta é permitida para o plano
+    if (!toolAllowed) {
+      setShowToolBlockedModal(true)
+      return
+    }
     
     // Verificar limite antes de gerar
     if (!canGenerate) {
@@ -431,8 +450,14 @@ export default function AIToolsPage() {
         used={used}
         limit={limit}
       />
+      
+      <ToolBlockedModal
+        isOpen={showToolBlockedModal}
+        onClose={() => setShowToolBlockedModal(false)}
+        toolName={TOOL_NAMES.funnel}
+        requiredPlan={requiredPlan}
+        currentPlan={planName}
+      />
     </div>
   )
 }
-
-

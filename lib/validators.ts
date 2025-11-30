@@ -16,9 +16,14 @@ export type GenerateCopyInput = z.infer<typeof generateCopySchema>
 export const generateFunnelSchema = z.object({
   product: z.string().min(1, 'Produto é obrigatório').max(200),
   audience: z.string().min(1, 'Público é obrigatório').max(200),
-  goal: z.string().min(1, 'Objetivo é obrigatório').max(200),
-  budget: z.number().min(0, 'Orçamento deve ser positivo').optional(),
-  context: z.string().max(1000, 'Contexto muito longo').optional()
+  offer: z.string().min(1, 'Oferta é obrigatória').max(200),
+  objective: z.string().min(1, 'Objetivo é obrigatório').max(200),
+  funnelType: z.string().max(100).optional(),
+  budget: z.string().max(50).optional(),
+  timeframe: z.string().max(50).optional(),
+  context: z.string().max(1000, 'Contexto muito longo').optional(),
+  // Manter compatibilidade com campo antigo
+  goal: z.string().max(200).optional()
 })
 
 export type GenerateFunnelInput = z.infer<typeof generateFunnelSchema>
@@ -27,10 +32,13 @@ export type GenerateFunnelInput = z.infer<typeof generateFunnelSchema>
 export const generateAdsSchema = z.object({
   product: z.string().min(1, 'Produto é obrigatório').max(200),
   audience: z.string().min(1, 'Público é obrigatório').max(200),
-  platform: z.enum(['facebook', 'google', 'instagram', 'tiktok', 'linkedin']),
-  objective: z.enum(['awareness', 'consideration', 'conversion']),
-  budget: z.number().min(0).optional(),
-  context: z.string().max(500).optional()
+  offer: z.string().min(1, 'Oferta é obrigatória').max(200),
+  platform: z.string().min(1, 'Plataforma é obrigatória').max(100),
+  objective: z.string().min(1, 'Objetivo é obrigatório').max(100),
+  budget: z.union([z.number(), z.string()]).optional(),
+  timeframe: z.union([z.number(), z.string()]).optional(),
+  region: z.string().max(100).optional(),
+  context: z.string().max(1000).optional()
 })
 
 export type GenerateAdsInput = z.infer<typeof generateAdsSchema>
@@ -39,8 +47,11 @@ export type GenerateAdsInput = z.infer<typeof generateAdsSchema>
 export const generateCanvasSchema = z.object({
   product: z.string().min(1, 'Produto é obrigatório').max(200),
   audience: z.string().min(1, 'Público é obrigatório').max(200),
+  offer: z.string().min(1, 'Oferta é obrigatória').max(200),
+  objective: z.string().min(1, 'Objetivo é obrigatório').max(200),
+  market: z.string().max(200).optional(),
   value_proposition: z.string().max(300).optional(),
-  context: z.string().max(500).optional()
+  context: z.string().max(1000).optional()
 })
 
 export type GenerateCanvasInput = z.infer<typeof generateCanvasSchema>

@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const { product, audience, value_proposition, context } = validation.data
+    const { product, audience, offer, objective, market, value_proposition, context } = validation.data
 
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
@@ -75,7 +75,10 @@ export async function POST(request: NextRequest) {
     const prompt = buildPrompt({
       product,
       audience,
-      value_proposition: value_proposition || "",
+      offer: offer || "",
+      objective: objective || "",
+      market: market || "",
+      value_proposition: value_proposition || offer || "",
       context: context || ""
     })
 
@@ -165,7 +168,9 @@ export async function POST(request: NextRequest) {
       metadata: {
         product,
         audience,
-        value_proposition
+        offer,
+        objective,
+        market
       }
     })
 
@@ -179,6 +184,9 @@ export async function POST(request: NextRequest) {
 function buildPrompt(s: {
   product: string
   audience: string
+  offer: string
+  objective: string
+  market: string
   value_proposition: string
   context: string
 }) {
@@ -194,7 +202,15 @@ function buildPrompt(s: {
     "costStructure": string[]
   }`
 
-  const base = `Você é um estrategista de marketing em pt-BR. Gere um Marketing Model Canvas completo e prático baseado nos dados fornecidos. Público: ${s.audience}. Produto/serviço: ${s.product}. Proposta de valor: ${s.value_proposition || "indefinida"}. Contexto adicional: ${s.context}.
+  const base = `Você é um estrategista de marketing em pt-BR. Gere um Marketing Model Canvas completo e prático baseado nos dados fornecidos.
+
+Produto/serviço: ${s.product}
+Público-alvo: ${s.audience}
+Oferta: ${s.offer}
+Objetivo: ${s.objective}
+Mercado/Nicho: ${s.market || "não especificado"}
+Proposta de valor: ${s.value_proposition || s.offer || "não especificada"}
+Contexto adicional: ${s.context || "nenhum"}
 
 Responda estritamente com JSON válido e nada mais, conforme o schema abaixo. Use bullets curtos, claros e acionáveis para cada bloco. Inclua somente os 9 blocos do Canvas (sem campos extras). Schema: ${schema}`
 

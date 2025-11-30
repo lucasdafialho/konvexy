@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const { product, audience, platform, objective, budget, context } = validation.data
+    const { product, audience, offer, platform, objective, budget, timeframe, region, context } = validation.data
 
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
@@ -71,12 +71,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Serviço temporariamente indisponível" }, { status: 500 })
     }
 
+    const budgetNum = typeof budget === 'string' ? parseInt(budget) || 0 : budget || 0
+    const timeframeNum = typeof timeframe === 'string' ? parseInt(timeframe) || 30 : timeframe || 30
+
     const prompt = buildPrompt({
       product,
       audience,
+      offer: offer || "",
       platform,
       objective,
-      budget: budget || 0,
+      budget: budgetNum,
+      timeframe: timeframeNum,
+      region: region || "BR",
       context: context || ""
     })
 
@@ -205,9 +211,12 @@ export async function POST(request: NextRequest) {
       metadata: {
         product,
         audience,
+        offer,
         objective,
         platform,
-        budget
+        budget: budgetNum,
+        timeframe: timeframeNum,
+        region
       }
     })
 
@@ -221,9 +230,12 @@ export async function POST(request: NextRequest) {
 function buildPrompt(s: {
   product: string
   audience: string
+  offer: string
   platform: string
   objective: string
   budget: number
+  timeframe: number
+  region: string
   context: string
 }) {
   const schema = `{
@@ -253,7 +265,15 @@ function buildPrompt(s: {
   }`
 
   const base = `Você é um media buyer sênior em pt-BR. Gere uma estratégia de tráfego pago orientada a resultados para ${s.platform}.
-Produto/serviço: ${s.product}. Público: ${s.audience}. Objetivo: ${s.objective}. Orçamento mensal em BRL: ${s.budget || "indefinido"}. Contexto: ${s.context}.
+
+Produto/serviço: ${s.product}
+Oferta: ${s.offer}
+Público-alvo: ${s.audience}
+Objetivo: ${s.objective}
+Orçamento mensal (BRL): R$ ${s.budget || "indefinido"}
+Janela de execução: ${s.timeframe} dias
+Região: ${s.region}
+Contexto adicional: ${s.context || "nenhum"}
 
 Responda estritamente com JSON válido no schema abaixo. Use chaves duplas em todas as propriedades e strings. Não inclua comentários, blocos de código ou texto fora do JSON. Crie no mínimo 3 criativos por campanha com "headline", "description" e "cta". Schema: ${schema}`
 

@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const { product, audience, goal, budget, context } = validation.data
+    const { product, audience, offer, objective, funnelType, budget, timeframe, context } = validation.data
 
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
@@ -74,8 +74,11 @@ export async function POST(request: NextRequest) {
     const prompt = buildPrompt({
       product,
       audience,
-      goal,
-      budget: budget || 0,
+      offer: offer || "",
+      objective: objective || "",
+      funnelType: funnelType || "",
+      budget: budget || "",
+      timeframe: timeframe || "",
       context: context || ""
     })
 
@@ -196,7 +199,9 @@ export async function POST(request: NextRequest) {
       metadata: {
         product,
         audience,
-        goal,
+        offer,
+        objective,
+        funnelType,
         budget
       }
     })
@@ -211,8 +216,11 @@ export async function POST(request: NextRequest) {
 function buildPrompt(s: {
   product: string
   audience: string
-  goal: string
-  budget: number
+  offer: string
+  objective: string
+  funnelType: string
+  budget: string
+  timeframe: string
   context: string
 }) {
   const schema = `{
@@ -236,7 +244,16 @@ function buildPrompt(s: {
     "timeline": [{ "phase": string, "week": string, "focus": string }]
   }`
 
-  const base = `Você é um estrategista de growth e funis de vendas em pt-BR. Gere um plano completo de funil baseado nos dados fornecidos. Público: ${s.audience}. Produto/serviço: ${s.product}. Objetivo: ${s.goal}. Orçamento (BRL): ${s.budget || "indefinido"}. Contexto adicional: ${s.context}.
+  const base = `Você é um estrategista de growth e funis de vendas em pt-BR. Gere um plano completo de funil baseado nos dados fornecidos.
+
+Produto/serviço: ${s.product}
+Público-alvo: ${s.audience}
+Oferta: ${s.offer}
+Objetivo: ${s.objective}
+Tipo de funil: ${s.funnelType || "Lead Magnet"}
+Orçamento: ${s.budget || "indefinido"}
+Janela de execução: ${s.timeframe || "30 dias"}
+Contexto adicional: ${s.context || "nenhum"}
 
 Responda estritamente com JSON válido e nada mais, conforme o schema abaixo. Não use blocos de código ou comentários. Para cada etapa, inclua canais, ações objetivas, recomendações e KPIs. Schema: ${schema}`
 
