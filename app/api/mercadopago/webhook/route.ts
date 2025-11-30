@@ -78,6 +78,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid structure" }, { status: 400 })
     }
 
+    // 2.5 TESTE DE SIMULAÇÃO - Mercado Pago envia live_mode: false
+    // Só aceita se vier do IP do Mercado Pago ou se DEBUG estiver ativo
+    if (body.live_mode === false) {
+      const debugMode = process.env.MERCADOPAGO_WEBHOOK_DEBUG === 'true'
+      
+      if (debugMode) {
+        console.log('🧪 TESTE DE SIMULAÇÃO detectado (debug mode ativo)')
+        return NextResponse.json({
+          received: true,
+          status: "test_simulation",
+          message: "Webhook de teste recebido com sucesso!"
+        })
+      } else {
+        // Em produção sem debug, ignora silenciosamente testes
+        console.log('🧪 Teste de simulação ignorado (debug mode desativado)')
+        return NextResponse.json({ received: true, status: "test_ignored" })
+      }
+    }
+
     // 3. Verificar Supabase
     const supabase = getSupabase()
     if (!supabase) {
