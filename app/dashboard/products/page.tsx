@@ -26,6 +26,7 @@ import {
   ArrowUpRight,
   Sparkles,
   ChevronRight,
+  Crown
 } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import Link from "next/link"
@@ -219,11 +220,11 @@ export default function ProductsPage() {
   const getCompetitionStyles = (level: string) => {
     switch (level) {
       case "low":
-        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+        return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
       case "medium":
-        return "bg-amber-500/10 text-amber-400 border-amber-500/20"
+        return "bg-amber-500/10 text-amber-500 border-amber-500/20"
       case "high":
-        return "bg-rose-500/10 text-rose-400 border-rose-500/20"
+        return "bg-rose-500/10 text-rose-500 border-rose-500/20"
       default:
         return "bg-muted text-muted-foreground"
     }
@@ -232,13 +233,13 @@ export default function ProductsPage() {
   const getProfitStyles = (level: string) => {
     switch (level) {
       case "low":
-        return "bg-slate-500/10 text-slate-400 border-slate-500/20"
+        return "bg-slate-500/10 text-slate-500 border-slate-500/20"
       case "medium":
-        return "bg-blue-500/10 text-blue-400 border-blue-500/20"
+        return "bg-blue-500/10 text-blue-500 border-blue-500/20"
       case "high":
-        return "bg-violet-500/10 text-violet-400 border-violet-500/20"
+        return "bg-violet-500/10 text-violet-500 border-violet-500/20"
       case "very-high":
-        return "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30"
+        return "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 border-amber-500/30"
       default:
         return "bg-muted text-muted-foreground"
     }
@@ -247,9 +248,9 @@ export default function ProductsPage() {
   const getTrendIcon = (trend: string) => {
     switch (trend) {
       case "up":
-        return <TrendingUp className="w-4 h-4 text-emerald-400" />
+        return <TrendingUp className="w-4 h-4 text-emerald-500" />
       case "down":
-        return <TrendingDown className="w-4 h-4 text-rose-400" />
+        return <TrendingDown className="w-4 h-4 text-rose-500" />
       default:
         return <BarChart3 className="w-4 h-4 text-muted-foreground" />
     }
@@ -269,60 +270,63 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="min-h-screen" data-animate>
+    <div className="min-h-screen space-y-8" data-animate>
       {/* Header Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-violet-500/5 to-background border border-primary/10 mb-8 p-8">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgxMDksMzQsMjE3LDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
-        <div className="relative">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-violet-600 shadow-lg shadow-primary/25">
-              <Flame className="w-6 h-6 text-white" />
+      <div className="relative overflow-hidden rounded-2xl bg-card border border-border/50 p-8 shadow-sm">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+                <Flame className="w-8 h-8 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-foreground tracking-tight">Nichos em Alta</h1>
+                <p className="text-muted-foreground mt-1">Descubra as melhores oportunidades do mercado digital</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Produtos em Alta</h1>
-              <p className="text-muted-foreground">Descubra as melhores oportunidades do momento</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-4 mt-6">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border border-border/50">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">{filteredProducts.length} produtos encontrados</span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border border-border/50">
-              <TrendingUp className="w-4 h-4 text-emerald-500" />
-              <span className="text-sm font-medium">Atualizado hoje</span>
+            
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-background border border-border shadow-sm">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">{filteredProducts.length} oportunidades</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <TrendingUp className="w-4 h-4 text-emerald-500" />
+                <span className="text-sm font-medium text-emerald-600">Atualizado hoje</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters Card */}
-      <Card className="mb-8 border-border/50 bg-card/50 backdrop-blur-sm" data-animate>
-        <CardHeader className="pb-4">
+      <Card className="border-border/50 shadow-sm" data-animate>
+        <CardHeader className="pb-4 border-b border-border/50">
           <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-primary" />
-            <CardTitle className="text-lg">Filtros</CardTitle>
+            <Filter className="w-4 h-4 text-primary" />
+            <CardTitle className="text-base font-medium">Filtros Avançados</CardTitle>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide">Buscar</Label>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="space-y-2.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Buscar</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar produtos..."
+                  placeholder="Buscar nichos..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-background/50 border-border/50 focus:border-primary/50"
+                  className="pl-9 h-10 bg-background transition-all focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide">Categoria</Label>
+            <div className="space-y-2.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Categoria</Label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="bg-background/50 border-border/50">
+                <SelectTrigger className="h-10 bg-background">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -335,10 +339,10 @@ export default function ProductsPage() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide">Concorrência</Label>
+            <div className="space-y-2.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Concorrência</Label>
               <Select value={selectedCompetition} onValueChange={setSelectedCompetition}>
-                <SelectTrigger className="bg-background/50 border-border/50">
+                <SelectTrigger className="h-10 bg-background">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -351,10 +355,10 @@ export default function ProductsPage() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide">Potencial</Label>
+            <div className="space-y-2.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Potencial</Label>
               <Select value={selectedProfit} onValueChange={setSelectedProfit}>
-                <SelectTrigger className="bg-background/50 border-border/50">
+                <SelectTrigger className="h-10 bg-background">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -375,10 +379,10 @@ export default function ProductsPage() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide">Ordenar por</Label>
+            <div className="space-y-2.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Ordenar por</Label>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="bg-background/50 border-border/50">
+                <SelectTrigger className="h-10 bg-background">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -393,21 +397,22 @@ export default function ProductsPage() {
       </Card>
 
       {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-8">
         {/* Products List */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-5">
           {filteredProducts.map((product, index) => (
             <Card 
               key={product.id} 
-              className={`group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/30 ${selectedProduct?.id === product.id ? 'ring-2 ring-primary/50 border-primary/50' : ''}`}
+              className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/30 cursor-pointer ${selectedProduct?.id === product.id ? 'ring-2 ring-primary border-primary shadow-md' : 'border-border/50'}`}
+              onClick={() => setSelectedProduct(product)}
               data-animate
               style={{ animationDelay: `${index * 50}ms` }}
             >
               {/* Hot badge for top products */}
               {product.demandScore >= 90 && (
-                <div className="absolute top-0 right-0">
-                  <div className="bg-gradient-to-r from-orange-500 to-rose-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg flex items-center gap-1">
-                    <Flame className="w-3 h-3" />
+                <div className="absolute top-0 right-0 z-10">
+                  <div className="bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg flex items-center gap-1 shadow-sm">
+                    <Flame className="w-3 h-3 fill-current" />
                     HOT
                   </div>
                 </div>
@@ -417,18 +422,18 @@ export default function ProductsPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-3">
-                      <Badge variant="outline" className="bg-primary/5 border-primary/20 text-primary">
+                      <Badge variant="secondary" className="font-medium text-foreground/80">
                         {product.category}
                       </Badge>
-                      <Badge className={`border ${getCompetitionStyles(product.competitionLevel)}`}>
+                      <Badge className={`font-medium border ${getCompetitionStyles(product.competitionLevel)}`}>
                         {product.competitionLevel === "low"
                           ? "Baixa Concorrência"
                           : product.competitionLevel === "medium"
                             ? "Média Concorrência"
                             : "Alta Concorrência"}
                       </Badge>
-                      <Badge className={`border ${getProfitStyles(product.profitPotential)}`}>
-                        {product.profitPotential === "very-high" && <Zap className="w-3 h-3 mr-1" />}
+                      <Badge className={`font-medium border ${getProfitStyles(product.profitPotential)}`}>
+                        {product.profitPotential === "very-high" && <Zap className="w-3 h-3 mr-1 fill-current" />}
                         {product.profitPotential === "low"
                           ? "Baixo Lucro"
                           : product.profitPotential === "medium"
@@ -438,65 +443,57 @@ export default function ProductsPage() {
                               : "Lucro Explosivo"}
                       </Badge>
                     </div>
-                    <CardTitle className="text-lg text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                    <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
                       {product.title}
                     </CardTitle>
-                    <CardDescription className="mt-2 text-muted-foreground line-clamp-2">
+                    <CardDescription className="mt-2 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                       {product.description}
                     </CardDescription>
                   </div>
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex flex-col items-center gap-2 pt-1">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={(e) => { e.stopPropagation(); toggleFavorite(product.id); }}
-                      className={`rounded-full ${favorites.includes(product.id) ? "text-rose-500 bg-rose-500/10" : "text-muted-foreground hover:text-rose-500"}`}
+                      className={`rounded-full transition-all ${favorites.includes(product.id) ? "text-rose-500 bg-rose-500/10 hover:bg-rose-500/20" : "text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10"}`}
                     >
                       <Heart className={`w-5 h-5 ${favorites.includes(product.id) ? "fill-current" : ""}`} />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => setSelectedProduct(product)}
-                      className="rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10"
-                    >
-                      <Eye className="w-5 h-5" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
               
-              <CardContent className="pt-0">
+              <CardContent className="pt-2">
                 {/* Stats Grid */}
-                <div className="grid grid-cols-4 gap-3 p-4 rounded-xl bg-muted/30 mb-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent">
+                <div className="grid grid-cols-4 gap-4 p-4 rounded-xl bg-muted/40 mb-5 border border-border/50">
+                  <div className="text-center space-y-1">
+                    <div className="text-2xl font-bold text-primary">
                       {product.demandScore}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-1">Demanda</div>
+                    <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Demanda</div>
                   </div>
-                  <div className="text-center border-l border-border/50">
+                  <div className="text-center space-y-1 border-l border-border/50">
                     <div className="text-2xl font-bold text-foreground">{product.validationScore}</div>
-                    <div className="text-xs text-muted-foreground mt-1">Validação</div>
+                    <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Validação</div>
                   </div>
-                  <div className="text-center border-l border-border/50">
+                  <div className="text-center space-y-1 border-l border-border/50">
                     <div className="text-2xl font-bold text-foreground">{(product.monthlySearches / 1000).toFixed(0)}K</div>
-                    <div className="text-xs text-muted-foreground mt-1">Buscas/mês</div>
+                    <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Buscas/mês</div>
                   </div>
-                  <div className="text-center border-l border-border/50 flex flex-col items-center justify-center">
+                  <div className="text-center space-y-1 border-l border-border/50 flex flex-col items-center justify-center">
                     {getTrendIcon(product.trend)}
-                    <div className="text-xs text-muted-foreground mt-1">Tendência</div>
+                    <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Tendência</div>
                   </div>
                 </div>
 
                 {/* Footer Info */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-6 text-sm text-muted-foreground font-medium">
+                    <div className="flex items-center gap-2">
                       <DollarSign className="w-4 h-4 text-emerald-500" />
                       <span>{product.priceRange}</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-blue-500" />
                       <span>{product.timeToMarket}</span>
                     </div>
@@ -505,14 +502,14 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-1.5 mt-4">
+                <div className="flex flex-wrap gap-2">
                   {product.tags.slice(0, 4).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs bg-muted/50 hover:bg-muted transition-colors">
+                    <Badge key={tag} variant="secondary" className="text-xs font-normal bg-background border border-border/50 hover:border-primary/30 transition-colors">
                       #{tag}
                     </Badge>
                   ))}
                   {product.tags.length > 4 && (
-                    <Badge variant="secondary" className="text-xs bg-muted/50">
+                    <Badge variant="secondary" className="text-xs font-normal bg-background border border-border/50">
                       +{product.tags.length - 4}
                     </Badge>
                   )}
@@ -522,135 +519,133 @@ export default function ProductsPage() {
           ))}
         </div>
 
-        {/* Sidebar */}
+        {/* Sidebar Details */}
         <div className="space-y-6">
           {/* Product Details */}
           {selectedProduct ? (
-            <Card className="sticky top-6 border-primary/20 bg-gradient-to-br from-card to-card/80 backdrop-blur-sm overflow-hidden" data-animate>
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-              <CardHeader className="relative">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="p-2 rounded-lg bg-primary/10">
+            <Card className="sticky top-6 border-primary/30 shadow-lg overflow-hidden" data-animate>
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+              <CardHeader className="relative pb-4">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
                     <Target className="w-5 h-5 text-primary" />
                   </div>
-                  <CardTitle className="text-lg">Análise Detalhada</CardTitle>
+                  <CardTitle className="text-lg font-bold">Análise Detalhada</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="relative space-y-5">
+              <CardContent className="relative space-y-6">
                 <div>
-                  <h3 className="font-semibold text-foreground mb-2 line-clamp-2">{selectedProduct.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-3">{selectedProduct.description}</p>
+                  <h3 className="font-bold text-xl text-foreground mb-3 leading-tight">{selectedProduct.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{selectedProduct.description}</p>
                 </div>
 
-                <Separator className="bg-border/50" />
+                <Separator />
 
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground flex items-center gap-2">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                    <span className="text-sm text-muted-foreground flex items-center gap-2 font-medium">
                       <BarChart3 className="w-4 h-4" />
                       Tamanho do Mercado
                     </span>
-                    <span className="text-sm font-bold text-emerald-500">{selectedProduct.marketSize}</span>
+                    <span className="text-sm font-bold text-foreground">{selectedProduct.marketSize}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground flex items-center gap-2">
+                  <div className="space-y-2">
+                    <span className="text-sm text-muted-foreground flex items-center gap-2 font-medium">
                       <Users className="w-4 h-4" />
                       Público-Alvo
                     </span>
-                    <span className="text-sm font-medium text-foreground">{selectedProduct.targetAudience}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
-                      Faixa de Preço
-                    </span>
-                    <span className="text-sm font-medium text-foreground">{selectedProduct.priceRange}</span>
+                    <p className="text-sm font-medium text-foreground bg-muted/30 p-3 rounded-lg">
+                      {selectedProduct.targetAudience}
+                    </p>
                   </div>
                 </div>
 
-                <Separator className="bg-border/50" />
+                <Separator />
 
                 <div>
-                  <h4 className="font-medium mb-3 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-primary" />
+                  <h4 className="font-bold text-sm mb-4 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-primary fill-current" />
                     Principais Benefícios
                   </h4>
-                  <ul className="space-y-2">
+                  <ul className="space-y-3">
                     {selectedProduct.keyBenefits.map((benefit, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm">
-                        <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <ArrowUpRight className="w-3 h-3 text-emerald-500" />
+                      <li key={index} className="flex items-start gap-3 text-sm group">
+                        <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-emerald-500/20 transition-colors">
+                          <ArrowUpRight className="w-3 h-3 text-emerald-600" />
                         </div>
-                        <span className="text-muted-foreground">{benefit}</span>
+                        <span className="text-muted-foreground group-hover:text-foreground transition-colors">{benefit}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <Separator className="bg-border/50" />
+                <Separator />
 
                 <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-muted-foreground">Score de Oportunidade</span>
-                    <span className="text-sm font-bold text-primary">{selectedProduct.validationScore}/100</span>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-sm font-medium text-muted-foreground">Score de Oportunidade</span>
+                    <span className="text-lg font-bold text-primary">{selectedProduct.validationScore}/100</span>
                   </div>
-                  <div className="w-full bg-muted/50 rounded-full h-2.5 overflow-hidden">
+                  <div className="w-full bg-muted rounded-full h-3 overflow-hidden border border-border/50">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-primary to-violet-500 transition-all duration-500"
+                      className="h-full rounded-full bg-primary transition-all duration-700 ease-out relative"
                       style={{ width: `${selectedProduct.validationScore}%` }}
-                    />
+                    >
+                      <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                    </div>
                   </div>
                 </div>
 
-                <Link href="/dashboard/copy-generator" className="block">
-                  <Button className="w-full bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90 text-white shadow-lg shadow-primary/25 group">
+                <Link href="/dashboard/copy-generator" className="block pt-2">
+                  <Button className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
                     <Sparkles className="w-4 h-4 mr-2" />
                     Gerar Copy para Este Produto
-                    <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="w-4 h-4 ml-2 opacity-50" />
                   </Button>
                 </Link>
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-dashed border-2 border-border/50 bg-muted/20" data-animate>
-              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                  <Eye className="w-8 h-8 text-primary" />
+            <Card className="border-dashed border-2 border-muted bg-muted/10" data-animate>
+              <CardContent className="flex flex-col items-center justify-center py-20 text-center px-6">
+                <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
+                  <Eye className="w-10 h-10 text-muted-foreground/50" />
                 </div>
-                <p className="text-muted-foreground max-w-[200px]">
-                  Clique no ícone de visualização de um produto para ver a análise detalhada
+                <h3 className="text-lg font-semibold text-foreground mb-2">Selecione um Nicho</h3>
+                <p className="text-sm text-muted-foreground max-w-[240px]">
+                  Clique em qualquer card da lista para ver a análise de mercado detalhada
                 </p>
               </CardContent>
             </Card>
           )}
 
           {/* Quick Stats */}
-          <Card className="border-border/50 bg-card/80 backdrop-blur-sm" data-animate>
+          <Card className="border-border/50 shadow-sm" data-animate>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary" />
-                Estatísticas
+              <CardTitle className="text-base font-bold flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-primary" />
+                Visão Geral
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 rounded-xl bg-muted/30 text-center">
+                <div className="p-4 rounded-xl bg-muted/30 text-center border border-border/50">
                   <div className="text-2xl font-bold text-foreground">2,847</div>
-                  <div className="text-xs text-muted-foreground mt-1">Produtos Analisados</div>
+                  <div className="text-[10px] font-medium text-muted-foreground uppercase mt-1">Nichos Analisados</div>
                 </div>
-                <div className="p-3 rounded-xl bg-muted/30 text-center">
-                  <div className="text-2xl font-bold text-emerald-500">156</div>
-                  <div className="text-xs text-muted-foreground mt-1">Oportunidades</div>
+                <div className="p-4 rounded-xl bg-emerald-500/5 text-center border border-emerald-500/10">
+                  <div className="text-2xl font-bold text-emerald-600">156</div>
+                  <div className="text-[10px] font-medium text-emerald-600/80 uppercase mt-1">Oportunidades</div>
                 </div>
               </div>
-              <Separator className="bg-border/50" />
+              <Separator />
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Mercado Total</span>
+                <span className="text-sm text-muted-foreground font-medium">Mercado Total</span>
                 <span className="text-sm font-bold text-foreground">R$ 12.4M/mês</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Seus Favoritos</span>
-                <Badge variant="secondary" className="bg-rose-500/10 text-rose-500 border-rose-500/20">
+                <span className="text-sm text-muted-foreground font-medium">Favoritos</span>
+                <Badge variant="secondary" className="bg-rose-500/10 text-rose-600 border-rose-500/20 font-bold">
                   <Heart className="w-3 h-3 mr-1 fill-current" />
                   {favorites.length}
                 </Badge>
@@ -660,32 +655,31 @@ export default function ProductsPage() {
 
           {/* Pro Features */}
           {user?.plan !== "pro" && (
-            <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/5 to-violet-500/5" data-animate>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+            <Card className="relative overflow-hidden border-primary/30 bg-primary/5" data-animate>
+              <div className="absolute -right-6 -top-6 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
               <CardHeader className="relative pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Star className="w-5 h-5 text-primary fill-primary" />
+                <CardTitle className="text-lg font-bold flex items-center gap-2 text-primary">
+                  <Crown className="w-5 h-5 fill-current" />
                   Recursos Pro
                 </CardTitle>
               </CardHeader>
-              <CardContent className="relative space-y-3">
+              <CardContent className="relative space-y-4">
                 {[
                   "Análise de concorrentes em tempo real",
                   "Histórico completo de tendências",
                   "Alertas de novas oportunidades",
                   "Dados exclusivos de mercado"
                 ].map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Zap className="w-3 h-3 text-primary" />
+                  <div key={index} className="flex items-center gap-3 text-sm">
+                    <div className="w-6 h-6 rounded-full bg-background border border-primary/20 flex items-center justify-center shadow-sm">
+                      <Zap className="w-3 h-3 text-primary fill-current" />
                     </div>
-                    <span className="text-muted-foreground">{feature}</span>
+                    <span className="font-medium text-foreground/80">{feature}</span>
                   </div>
                 ))}
-                <Link href="/dashboard/planos" className="block pt-2">
-                  <Button size="sm" className="w-full bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90">
-                    <Crown className="w-4 h-4 mr-2" />
-                    Fazer Upgrade
+                <Link href="/dashboard/planos" className="block pt-3">
+                  <Button size="sm" className="w-full font-semibold">
+                    Fazer Upgrade Agora
                   </Button>
                 </Link>
               </CardContent>
@@ -694,24 +688,5 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
-  )
-}
-
-function Crown(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
-    </svg>
   )
 }

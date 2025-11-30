@@ -37,7 +37,7 @@ const navigation: NavEntry[] = [
       { name: "Marketing Model Canvas", href: "/dashboard/canvas", icon: Layers3 },
     ],
   },
-  { type: "item", name: "Produtos Nichados", href: "/dashboard/products", icon: Target },
+  { type: "item", name: "Nichos em Alta", href: "/dashboard/products", icon: Target },
   { type: "item", name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { type: "item", name: "Planos", href: "/dashboard/planos", icon: CreditCard },
   { type: "item", name: "Configurações", href: "/dashboard/configuracoes", icon: Settings },
