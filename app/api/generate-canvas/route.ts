@@ -6,7 +6,6 @@ import { cleanMarkdownFromObject } from "@/lib/text-formatter"
 import { validateRequest } from "@/lib/api-security"
 import { RATE_LIMITS } from "@/lib/rate-limit-redis"
 import { generateCanvasSchema, validateInput } from "@/lib/validators"
-import { sanitizeAIContent } from "@/lib/content-sanitizer"
 import secureLogger from "@/lib/logger"
 import { logSecurityEvent } from "@/lib/audit"
 
@@ -77,7 +76,7 @@ export async function POST(request: NextRequest) {
       audience,
       offer: offer || "",
       objective: objective || "",
-      market: market || "",
+      market: market || "não especificado",
       value_proposition: value_proposition || offer || "",
       context: context || ""
     })
@@ -93,7 +92,7 @@ export async function POST(request: NextRequest) {
         temperature: 0.6,
         topP: 0.95,
         topK: 40,
-        maxOutputTokens: 1200,
+        maxOutputTokens: 1500,
         responseMimeType: "application/json",
         responseSchema: {
           type: "object",
@@ -191,16 +190,16 @@ function buildPrompt(s: {
   context: string
 }) {
   const schema = `{
-    "customerSegments": string[],
-    "valueProposition": string[],
-    "channels": string[],
-    "customerRelationships": string[],
-    "revenueStreams": string[],
-    "keyResources": string[],
-    "keyActivities": string[],
-    "keyPartners": string[],
-    "costStructure": string[]
-  }`
+  "customerSegments": string[],
+  "valueProposition": string[],
+  "channels": string[],
+  "customerRelationships": string[],
+  "revenueStreams": string[],
+  "keyResources": string[],
+  "keyActivities": string[],
+  "keyPartners": string[],
+  "costStructure": string[]
+}`
 
   const base = `Você é um estrategista de marketing em pt-BR. Gere um Marketing Model Canvas completo e prático baseado nos dados fornecidos.
 
@@ -208,11 +207,11 @@ Produto/serviço: ${s.product}
 Público-alvo: ${s.audience}
 Oferta: ${s.offer}
 Objetivo: ${s.objective}
-Mercado/Nicho: ${s.market || "não especificado"}
-Proposta de valor: ${s.value_proposition || s.offer || "não especificada"}
+Mercado/Nicho: ${s.market}
+Proposta de valor: ${s.value_proposition}
 Contexto adicional: ${s.context || "nenhum"}
 
-Responda estritamente com JSON válido e nada mais, conforme o schema abaixo. Use bullets curtos, claros e acionáveis para cada bloco. Inclua somente os 9 blocos do Canvas (sem campos extras). Schema: ${schema}`
+Responda estritamente com JSON válido no schema abaixo. Use chaves duplas em todas as propriedades e strings. Não inclua comentários, blocos de código ou texto fora do JSON. Inclua no mínimo 3 itens por bloco do Canvas. Schema: ${schema}`
 
   return base
 }

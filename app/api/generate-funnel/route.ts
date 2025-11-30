@@ -76,9 +76,9 @@ export async function POST(request: NextRequest) {
       audience,
       offer: offer || "",
       objective: objective || "",
-      funnelType: funnelType || "",
-      budget: budget || "",
-      timeframe: timeframe || "",
+      funnelType: funnelType || "Lead Magnet",
+      budget: budget || "indefinido",
+      timeframe: timeframe || "30 dias",
       context: context || ""
     })
 
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         temperature: 0.6,
         topP: 0.95,
         topK: 40,
-        maxOutputTokens: 1500,
+        maxOutputTokens: 2000,
         responseMimeType: "application/json",
         responseSchema: {
           type: "object",
@@ -115,15 +115,7 @@ export async function POST(request: NextRequest) {
                   kpis: { type: "array", items: { type: "string" } },
                   copyGuidelines: { type: "array", items: { type: "string" } },
                 },
-                required: [
-                  "name",
-                  "objective",
-                  "channels",
-                  "actions",
-                  "recommendations",
-                  "kpis",
-                  "copyGuidelines",
-                ],
+                required: ["name", "objective", "channels", "actions", "recommendations", "kpis", "copyGuidelines"],
               },
             },
             recommendedTools: { type: "array", items: { type: "string" } },
@@ -141,16 +133,7 @@ export async function POST(request: NextRequest) {
               },
             },
           },
-          required: [
-            "funnelType",
-            "objective",
-            "summary",
-            "kpis",
-            "stages",
-            "recommendedTools",
-            "contentIdeas",
-            "timeline",
-          ],
+          required: ["funnelType", "objective", "summary", "kpis", "stages", "recommendedTools", "contentIdeas", "timeline"],
         },
       },
     }
@@ -224,25 +207,25 @@ function buildPrompt(s: {
   context: string
 }) {
   const schema = `{
-    "funnelType": string,
-    "objective": string,
-    "summary": string,
-    "kpis": string[],
-    "stages": [
-      {
-        "name": string,
-        "objective": string,
-        "channels": string[],
-        "actions": string[],
-        "recommendations": string[],
-        "kpis": string[],
-        "copyGuidelines": string[]
-      }
-    ],
-    "recommendedTools": string[],
-    "contentIdeas": string[],
-    "timeline": [{ "phase": string, "week": string, "focus": string }]
-  }`
+  "funnelType": string,
+  "objective": string,
+  "summary": string,
+  "kpis": string[],
+  "stages": [
+    {
+      "name": string,
+      "objective": string,
+      "channels": string[],
+      "actions": string[],
+      "recommendations": string[],
+      "kpis": string[],
+      "copyGuidelines": string[]
+    }
+  ],
+  "recommendedTools": string[],
+  "contentIdeas": string[],
+  "timeline": [{ "phase": string, "week": string, "focus": string }]
+}`
 
   const base = `Você é um estrategista de growth e funis de vendas em pt-BR. Gere um plano completo de funil baseado nos dados fornecidos.
 
@@ -250,12 +233,12 @@ Produto/serviço: ${s.product}
 Público-alvo: ${s.audience}
 Oferta: ${s.offer}
 Objetivo: ${s.objective}
-Tipo de funil: ${s.funnelType || "Lead Magnet"}
-Orçamento: ${s.budget || "indefinido"}
-Janela de execução: ${s.timeframe || "30 dias"}
+Tipo de funil: ${s.funnelType}
+Orçamento: ${s.budget}
+Janela de execução: ${s.timeframe}
 Contexto adicional: ${s.context || "nenhum"}
 
-Responda estritamente com JSON válido e nada mais, conforme o schema abaixo. Não use blocos de código ou comentários. Para cada etapa, inclua canais, ações objetivas, recomendações e KPIs. Schema: ${schema}`
+Responda estritamente com JSON válido no schema abaixo. Use chaves duplas em todas as propriedades e strings. Não inclua comentários, blocos de código ou texto fora do JSON. Crie no mínimo 3 etapas de funil com canais, ações, recomendações e KPIs para cada. Schema: ${schema}`
 
   return base
 }
