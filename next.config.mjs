@@ -9,6 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Evitar redirect 307 em rotas de API
+  skipTrailingSlashRedirect: true,
+  trailingSlash: false,
   async headers() {
     return [
       {
