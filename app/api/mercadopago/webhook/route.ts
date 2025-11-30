@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase"
+import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase-admin"
 import { MercadoPagoService } from "@/lib/mercadopago"
 import secureLogger from "@/lib/logger"
 
@@ -55,10 +55,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar conexão com Supabase PRIMEIRO
-    if (!supabaseAdmin) {
-      secureLogger.error("❌ Supabase Admin não configurado")
+    if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+      secureLogger.error("❌ Supabase Admin não configurado", {
+        isConfigured: isSupabaseAdminConfigured,
+        hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+      })
       return NextResponse.json({
-        error: "Database connection error"
+        error: "Database connection error",
+        details: "SUPABASE_SERVICE_ROLE_KEY não configurado"
       }, { status: 500 })
     }
 

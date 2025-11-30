@@ -1,6 +1,6 @@
 import { MercadoPagoService, MercadoPagoPayment, MercadoPagoSubscription } from "@/lib/mercadopago"
 import { PaymentService } from "./payment-service"
-import { supabaseAdmin } from "@/lib/supabase-admin"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import secureLogger from "@/lib/logger"
 
 export interface WebhookHandlerResult {
@@ -186,6 +186,7 @@ export class PaymentWebhookHandler {
     })
 
     // Buscar usuário e cancelar assinatura
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('id')
@@ -312,6 +313,7 @@ export class SubscriptionWebhookHandler {
    * Processa assinatura cancelada
    */
   private async handleSubscriptionCancelled(userEmail: string): Promise<WebhookHandlerResult> {
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('id')

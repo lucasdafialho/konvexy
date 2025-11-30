@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase"
+import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase-admin"
 
 export async function POST(request: NextRequest) {
   try {
-    if (!supabaseAdmin) {
+    if (!isSupabaseAdminConfigured) {
       console.error('Supabase Admin não configurado')
       return NextResponse.json(
         { error: "Configuração do servidor inválida" },
         { status: 500 }
       )
     }
+
+    const supabaseAdmin = getSupabaseAdmin()
 
     const apiSecret = request.headers.get('x-api-secret')
     const expectedSecret = process.env.INTERNAL_API_SECRET

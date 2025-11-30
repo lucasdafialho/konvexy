@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase-admin"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 import secureLogger from "@/lib/logger"
 
 export type PlanType = "free" | "starter" | "pro"
@@ -32,6 +32,8 @@ export class PaymentService {
         paymentId: paymentData.paymentId
       })
 
+      const supabaseAdmin = getSupabaseAdmin()
+
       // 1. Buscar usuário
       const { data: profile, error: profileError } = await supabaseAdmin
         .from('profiles')
@@ -59,7 +61,7 @@ export class PaymentService {
       })
 
       // 3. Atualizar perfil do usuário
-      const { error: updateError } = await supabaseAdmin
+      const { error: updateError } = await getSupabaseAdmin()
         .from('profiles')
         .update({
           plan: planType,
@@ -101,6 +103,7 @@ export class PaymentService {
    */
   async cancelUserSubscription(userId: string): Promise<void> {
     const now = new Date()
+    const supabaseAdmin = getSupabaseAdmin()
 
     await supabaseAdmin
       .from('subscriptions')
@@ -185,6 +188,7 @@ export class PaymentService {
     }
   ): Promise<void> {
     const now = new Date()
+    const supabaseAdmin = getSupabaseAdmin()
 
     // Verificar se já existe subscription ativa
     const { data: existingActiveSub } = await supabaseAdmin

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase-admin"
+import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase-admin"
 import { MercadoPagoService } from "@/lib/mercadopago"
 import { PaymentWebhookHandler, SubscriptionWebhookHandler } from "@/lib/services/webhook-handlers"
 import secureLogger from "@/lib/logger"
@@ -23,10 +23,15 @@ export async function POST(request: NextRequest) {
 
   try {
     // 0. VERIFICAR SUPABASE
-    if (!supabaseAdmin) {
-      secureLogger.error(" Supabase Admin não configurado")
+    if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+      secureLogger.error("❌ Supabase Admin não configurado", {
+        isConfigured: isSupabaseAdminConfigured,
+        hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+      })
       return NextResponse.json({
-        error: "Database connection error"
+        error: "Database connection error",
+        details: "SUPABASE_SERVICE_ROLE_KEY não configurado"
       }, { status: 500 })
     }
 
@@ -37,7 +42,9 @@ export async function POST(request: NextRequest) {
       type: body.type,
       action: body.action,
       dataId: body.data?.id,
-      webhookId: body.id
+      webhookId: body.id,
+      liveMode: body.live_mode,
+      dateCreated: body.date_created
     })
 
     // 2. VALIDAR ESTRUTURA
@@ -49,22 +56,49 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. VALIDAR ASSINATURA
-    const mpService = new MercadoPagoService()
-    const headers = normalizeHeaders(request.headers)
+    let mpService: MercadoPagoService
+    try {
+      mpService = new MercadoPagoService()
+    } catch (error) {
+      secureLogger.error("❌ Erro ao inicializar MercadoPagoService", {
+        error: error instanceof Error ? error.message : 'Unknown',
+        hasAccessToken: !!process.env.MERCADOPAGO_ACCESS_TOKEN
+      })
+      return NextResponse.json({
+        error: "Service configuration error"
+      }, { status: 500 })
+    }
 
+    const headers = normalizeHeaders(request.headers)
     const isValid = mpService.validateWebhookSignature(headers, body)
 
-    if (!isValid) {
+    // MODO DEBUG: Permite webhooks em desenvolvimento sem validação
+    const debugMode = process.env.MERCADOPAGO_WEBHOOK_DEBUG === 'true'
+
+    if (!isValid && !debugMode) {
       secureLogger.security('🚫 Webhook rejeitado - assinatura inválida', {
         dataId: body.data?.id,
-        type: body.type
+        type: body.type,
+        hasSecret: !!process.env.MERCADOPAGO_WEBHOOK_SECRET,
+        nodeEnv: process.env.NODE_ENV,
+        debugMode
       })
       return NextResponse.json({
         error: "Invalid signature"
       }, { status: 401 })
     }
 
-    secureLogger.info('✅ Webhook validado com sucesso!')
+    if (debugMode && !isValid) {
+      secureLogger.warn('⚠️ MODO DEBUG ATIVO - Webhook sem assinatura válida aceito!', {
+        dataId: body.data?.id,
+        type: body.type
+      })
+    }
+
+    secureLogger.info('✅ Webhook validado com sucesso!', {
+      debugModeActive: debugMode,
+      signatureValid: isValid
+    })
 
     // 4. GERAR ID ÚNICO DO WEBHOOK
     webhookId = generateWebhookId(body, headers)
