@@ -1,17 +1,34 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Variáveis de ambiente do Supabase não configuradas. Verifique NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no .env.local')
+// Verificar variáveis apenas em runtime, não durante import
+function checkEnvVars() {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('❌ Variáveis do Supabase não configuradas:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseAnonKey
+    })
+    return false
+  }
+  return true
 }
 
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
+// Cliente para o browser (lazy initialization)
+let _supabase: ReturnType<typeof createBrowserClient> | null = null
 
-export const supabaseAdmin = supabaseServiceKey
+export const supabase = (() => {
+  if (!_supabase && supabaseUrl && supabaseAnonKey) {
+    _supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
+  }
+  return _supabase!
+})()
+
+// Cliente admin (apenas servidor)
+export const supabaseAdmin = (supabaseServiceKey && supabaseUrl)
   ? createSupabaseClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
@@ -22,7 +39,7 @@ export const supabaseAdmin = supabaseServiceKey
 
 // Export a function to create client instances
 export function createClient() {
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!checkEnvVars()) {
     throw new Error('Variáveis de ambiente do Supabase não configuradas')
   }
   return createBrowserClient(supabaseUrl, supabaseAnonKey)
