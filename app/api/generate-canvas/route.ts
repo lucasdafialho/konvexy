@@ -219,14 +219,10 @@ Responda estritamente com JSON válido e nada mais, conforme o schema abaixo. Us
 
 function extractText(json: any): string {
   try {
-    const parts = json?.candidates?.[0]?.content?.parts
-    if (Array.isArray(parts)) {
-      for (const part of parts) {
-        const txt = (part?.text ?? "").trim()
-        if (txt && (txt.startsWith("{") || txt.startsWith("["))) return txt
-      }
-      const joined = parts.map((p: any) => p?.text || "").join("\n").trim()
-      return joined
+    const c = json?.candidates?.[0]?.content?.parts
+    if (Array.isArray(c)) {
+      const t = c.map((p: any) => p?.text || "").join("\n").trim()
+      return t
     }
     const t2 = json?.candidates?.[0]?.output_text
     return String(t2 || "").trim()
@@ -241,8 +237,35 @@ function extractJsonObject(source: string): any | null {
     return JSON.parse(cleaned)
   } catch {}
   try {
-    const objMatch = cleaned.match(/\{[\s\S]*\}$/)
-    if (objMatch) return JSON.parse(objMatch[0])
+    let start = -1
+    let depth = 0
+    let inString = false
+    let quote: string | null = null
+    let prev = ""
+    for (let i = 0; i < cleaned.length; i++) {
+      const ch = cleaned[i]
+      if (inString) {
+        if (ch === quote && prev !== "\\") inString = false
+      } else {
+        if (ch === '"' || ch === "'") {
+          inString = true
+          quote = ch
+        } else if (ch === "{") {
+          if (depth === 0) start = i
+          depth++
+        } else if (ch === "}") {
+          depth--
+          if (depth === 0 && start !== -1) {
+            const slice = cleaned.slice(start, i + 1)
+            try {
+              return JSON.parse(slice)
+            } catch {}
+            start = -1
+          }
+        }
+      }
+      prev = ch
+    }
   } catch {}
   return null
 }
