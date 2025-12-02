@@ -460,7 +460,7 @@ export default function ProductsPage() {
         <div className="space-y-4 min-w-0">
           {/* Selected Product Details */}
           {selectedProduct ? (
-            <Card className="lg:sticky lg:top-4 border-purple-500/30 overflow-hidden" data-animate>
+            <Card className="border-purple-500/30 overflow-hidden" data-animate>
               <div className="h-2 bg-gradient-to-r from-purple-500 to-violet-500" />
               <CardContent className="p-5 space-y-5">
                 {/* Header */}

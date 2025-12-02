@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
-  ArrowLeft,
   Rocket,
   Zap,
   Target,
@@ -27,15 +26,9 @@ export default function GuiaRapido() {
             <span className="text-2xl font-bold tracking-tight">Konvexy</span>
           </Link>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" asChild>
+            <Button size="sm" asChild>
               <Link href="/dashboard">
                 Ir para Dashboard
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
               </Link>
             </Button>
           </div>

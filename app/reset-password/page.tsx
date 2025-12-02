@@ -1,0 +1,259 @@
+"use client"
+
+import type React from "react"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Eye, EyeOff, CheckCircle2, Lock } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase"
+import { isValidPassword } from "@/lib/error-messages"
+
+export default function ResetPasswordPage() {
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState(false)
+  const [isValidSession, setIsValidSession] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    // Verifica se o usuário tem uma sessão válida de recuperação
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (session) {
+        setIsValidSession(true)
+      } else {
+        setError("Link de recuperação inválido ou expirado. Por favor, solicite um novo link.")
+      }
+    }
+
+    checkSession()
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError("")
+    setSuccess(false)
+
+    // Validações
+    if (!newPassword || !confirmPassword) {
+      setError("Por favor, preencha todos os campos.")
+      setIsLoading(false)
+      return
+    }
+
+    const passwordValidation = isValidPassword(newPassword)
+    if (!passwordValidation.valid) {
+      setError(passwordValidation.message || "Senha inválida.")
+      setIsLoading(false)
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("As senhas não coincidem.")
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      // Atualiza a senha usando Supabase
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword
+      })
+
+      if (updateError) {
+        throw updateError
+      }
+
+      setSuccess(true)
+
+      // Redireciona para o login após 3 segundos
+      setTimeout(() => {
+        router.push("/login")
+      }, 3000)
+    } catch (err: any) {
+      console.error("Erro ao redefinir senha:", err)
+      setError(err.message || "Erro ao redefinir senha. Tente novamente.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (!isValidSession && !success) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="flex items-center justify-center mb-8">
+            <img src="/konvexy/konvexy-logo.png" alt="Konvexy" className="h-36 w-auto" />
+          </div>
+
+          <Card className="border-0 shadow-xl">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">Link inválido</CardTitle>
+              <CardDescription>
+                O link de recuperação de senha expirou ou é inválido
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="p-4 text-sm text-destructive-foreground bg-destructive/10 border border-destructive/30 rounded-lg mb-4">
+                <p>{error}</p>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" asChild>
+                  <Link href="/forgot-password">
+                    Solicitar novo link
+                  </Link>
+                </Button>
+                <Button className="flex-1" asChild>
+                  <Link href="/login">
+                    Voltar ao login
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="mt-8 text-center">
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+              ← Voltar para o site
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="flex items-center justify-center mb-8">
+          <img src="/konvexy/konvexy-logo.png" alt="Konvexy" className="h-36 w-auto" />
+        </div>
+
+        <Card className="border-0 shadow-xl">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Redefinir senha</CardTitle>
+            <CardDescription>
+              {success
+                ? "Senha alterada com sucesso!"
+                : "Crie uma nova senha para sua conta"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {success ? (
+              <div className="space-y-6">
+                <div className="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-emerald-700 dark:text-emerald-400 mb-2">
+                        Senha redefinida!
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Sua senha foi alterada com sucesso. Você será redirecionado para o login em alguns segundos...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Button className="w-full" asChild>
+                  <Link href="/login">
+                    Ir para o login
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div className="p-4 text-sm text-destructive-foreground bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <span className="flex-1">{error}</span>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">Nova senha</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      id="newPassword"
+                      type={showNewPassword ? "text" : "password"}
+                      placeholder="Mínimo 6 caracteres"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      className="h-11 pl-10 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {newPassword && newPassword.length < 6 && (
+                    <p className="text-xs text-destructive">A senha deve ter no mínimo 6 caracteres</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Digite a senha novamente"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      className="h-11 pl-10 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {confirmPassword && newPassword !== confirmPassword && (
+                    <p className="text-xs text-destructive">As senhas não coincidem</p>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground"
+                  disabled={isLoading || newPassword !== confirmPassword || newPassword.length < 6}
+                >
+                  {isLoading ? "Redefinindo..." : "Redefinir senha"}
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="mt-8 text-center">
+          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+            ← Voltar para o site
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
