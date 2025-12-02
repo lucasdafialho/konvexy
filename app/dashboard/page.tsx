@@ -14,8 +14,6 @@ import {
   TrendingUp,
   Zap,
   Target,
-  Users,
-  DollarSign,
   BarChart3,
   ArrowUpRight,
   Activity,
@@ -111,78 +109,81 @@ export default function DashboardPage() {
         {
           title: "Copies Geradas",
           value: "0",
-          change: "+0%",
+          change: "",
           changeType: "positive" as const,
           icon: Zap,
           color: "bg-primary",
           comingSoon: false,
         },
         {
-          title: "Taxa de Conversão",
-          value: "Em breve",
+          title: "Este Mês",
+          value: "0",
           change: "",
           changeType: "positive" as const,
-          icon: TrendingUp,
-          color: "bg-muted",
-          comingSoon: true,
-        },
-        {
-          title: "Produtos Analisados",
-          value: "0",
-          change: "+0",
-          changeType: "positive" as const,
-          icon: Target,
+          icon: Activity,
           color: "bg-primary",
           comingSoon: false,
         },
         {
-          title: "ROI Médio",
-          value: "Em breve",
+          title: "Ferramentas Usadas",
+          value: "0",
           change: "",
           changeType: "positive" as const,
-          icon: DollarSign,
-          color: "bg-muted",
-          comingSoon: true,
+          icon: Layers3,
+          color: "bg-primary",
+          comingSoon: false,
+        },
+        {
+          title: "Últimos 7 Dias",
+          value: "0",
+          change: "",
+          changeType: "positive" as const,
+          icon: TrendingUp,
+          color: "bg-primary",
+          comingSoon: false,
         },
       ]
     }
 
+    const monthlyChange = dashboardStats.stats.copiesGenerated.change
+    const changeDisplay = monthlyChange !== 0 ? `${monthlyChange >= 0 ? '+' : ''}${monthlyChange}%` : ''
+
     return [
       {
-        title: "Copies Geradas",
+        title: "Total de Copies",
         value: dashboardStats.stats.copiesGenerated.value.toString(),
-        change: `${dashboardStats.stats.copiesGenerated.change >= 0 ? '+' : ''}${dashboardStats.stats.copiesGenerated.change}%`,
+        change: changeDisplay,
         changeType: dashboardStats.stats.copiesGenerated.changeType,
         icon: Zap,
         color: "bg-primary",
         comingSoon: false,
       },
       {
-        title: "Taxa de Conversão",
-        value: "Em breve",
+        title: "Este Mês",
+        value: dashboardStats.performance.copiesGenerated.toString(),
         change: "",
         changeType: "positive" as const,
-        icon: TrendingUp,
-        color: "bg-muted",
-        comingSoon: true,
-      },
-      {
-        title: "Produtos Analisados",
-        value: dashboardStats.stats.productsAnalyzed.value.toString(),
-        change: `+${dashboardStats.stats.productsAnalyzed.change}`,
-        changeType: dashboardStats.stats.productsAnalyzed.changeType,
-        icon: Target,
+        icon: Activity,
         color: "bg-primary",
         comingSoon: false,
       },
       {
-        title: "ROI Médio",
-        value: "Em breve",
+        title: "Ferramentas Usadas",
+        value: dashboardStats.stats.productsAnalyzed.value.toString(),
         change: "",
         changeType: "positive" as const,
-        icon: DollarSign,
-        color: "bg-muted",
-        comingSoon: true,
+        icon: Layers3,
+        color: "bg-primary",
+        comingSoon: false,
+      },
+      {
+        title: "Últimos 7 Dias",
+        value: dashboardStats.performance.copiesGenerated.toString(),
+        change: "",
+        changeType: "positive" as const,
+        icon: TrendingUp,
+        color: "bg-primary",
+        comingSoon: false,
       },
     ]
   }, [dashboardStats])
@@ -221,112 +222,116 @@ export default function DashboardPage() {
       textColor: "text-white",
     },
     {
-      title: "Explorar Produtos",
-      description: "Descubra produtos nichados validados",
-      icon: Target,
+      title: "Nichos em Alta",
+      description: "Descubra oportunidades validadas",
+      icon: TrendingUp,
       href: "/dashboard/products",
       color: "bg-primary",
       textColor: "text-white",
     },
     {
-      title: "Ver Analytics",
-      description: "Em breve",
-      icon: BarChart3,
-      href: "/dashboard/analytics",
-      color: "bg-muted",
-      textColor: "text-muted-foreground",
+      title: "Marketing Canvas",
+      description: "Crie estratégias completas",
+      icon: Layers3,
+      href: "/dashboard/canvas",
+      color: "bg-primary",
+      textColor: "text-white",
     },
   ]
 
   return (
     <div className="min-h-screen space-y-8 pb-12" data-animate>
-      <div className="border-b border-border pb-8">
-        <div className="flex items-center justify-between">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/20 p-8">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        <div className="relative z-10 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              Bem-vindo, {user?.name?.split(" ")[0] || "Usuário"}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 rounded-xl bg-primary/20 border border-primary/30">
+                <Sparkles className="w-6 h-6 text-primary" />
+              </div>
+              {user?.plan === "pro" && (
+                <Badge className="px-3 py-1 text-xs font-bold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/25">
+                  PRO
+                </Badge>
+              )}
+              {user?.plan === "starter" && (
+                <Badge variant="secondary" className="px-3 py-1 text-xs font-bold bg-primary/20 text-primary border border-primary/30">
+                  STARTER
+                </Badge>
+              )}
+              {(!user?.plan || user?.plan === "free") && (
+                <Badge variant="outline" className="px-3 py-1 text-xs font-medium border-muted-foreground/50 text-muted-foreground">
+                  GRATUITO
+                </Badge>
+              )}
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+              Olá, {user?.name?.split(" ")[0] || "Usuário"} 👋
             </h1>
-            <p className="text-lg text-muted-foreground">
-              Gerencie suas campanhas de marketing digital e acompanhe seus resultados
+            <p className="text-base md:text-lg text-muted-foreground max-w-xl">
+              Gerencie suas campanhas de marketing digital e acompanhe seus resultados em tempo real
             </p>
           </div>
-          <div className="flex items-center space-x-4">
-            {user?.plan === "pro" && (
-              <Badge className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground">
-                PLANO PRO
-              </Badge>
-            )}
-            {user?.plan === "starter" && (
-              <Badge variant="secondary" className="px-4 py-2 text-sm font-semibold">
-                PLANO STARTER
-              </Badge>
-            )}
-            {(!user?.plan || user?.plan === "free") && (
-              <Badge variant="outline" className="px-4 py-2 text-sm font-semibold border-muted-foreground text-muted-foreground">
-                PLANO GRATUITO
-              </Badge>
-            )}
+          <div className="hidden lg:flex items-center gap-3">
+            <Link href="/dashboard/copy-generator">
+              <Button size="lg" className="shadow-lg shadow-primary/25 font-semibold">
+                <Zap className="w-4 h-4 mr-2" />
+                Nova Copy
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
 
-      <Card className="border-l-4 border-l-primary bg-card shadow-lg hover:shadow-xl transition-shadow" data-animate>
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-xl font-semibold text-foreground flex items-center space-x-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                <span>Status da Conta</span>
-              </CardTitle>
-              <CardDescription className="text-muted-foreground mt-2">
-                {user?.plan === "pro"
-                  ? "Você tem acesso completo a todas as funcionalidades premium"
-                  : user?.plan === "free"
-                  ? "Você está no plano gratuito. Assine um plano para ter mais gerações!"
-                  : "Faça upgrade para Pro e desbloqueie recursos avançados de IA"}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        {user?.plan !== "pro" && (
-          <CardContent className="pt-0">
-            <div className="space-y-4">
-              <div className="flex justify-between text-sm font-medium">
-                <span className="text-muted-foreground">
-                  {user?.plan === "free" ? "Gerações gratuitas utilizadas" : "Copies utilizadas este mês"}
-                </span>
-                <span className="text-foreground">
-                  {used}/{limit === -1 ? "∞" : limit}
-                </span>
+      <Card className="bg-card border border-border/50 shadow-sm hover:shadow-md transition-all" data-animate>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <Zap className="w-6 h-6 text-primary" />
               </div>
-              <Progress value={limit > 0 ? (used / limit) * 100 : 0} className="h-3" />
-              {remaining === 0 && limit !== -1 && (
-                <p className="text-sm text-destructive font-medium">
-                  Você atingiu o limite de gerações. Assine um plano para continuar!
+              <div>
+                <h3 className="font-semibold text-foreground">Gerações Disponíveis</h3>
+                <p className="text-sm text-muted-foreground">
+                  {user?.plan === "pro"
+                    ? "Acesso ilimitado a todas as ferramentas"
+                    : `${remaining} de ${limit} restantes este mês`}
                 </p>
-              )}
-              <Link href="/dashboard/planos">
-                <Button className="font-semibold w-full">
-                  {user?.plan === "free" ? "Ver Planos" : "Fazer Upgrade para Pro"}
-                </Button>
-              </Link>
+              </div>
             </div>
-          </CardContent>
-        )}
+            {user?.plan !== "pro" && (
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-1 max-w-md">
+                <div className="flex-1">
+                  <div className="flex justify-between text-xs font-medium mb-2">
+                    <span className="text-muted-foreground">Uso do mês</span>
+                    <span className="text-foreground">{used}/{limit}</span>
+                  </div>
+                  <Progress value={limit > 0 ? (used / limit) * 100 : 0} className="h-2" />
+                </div>
+                <Link href="/dashboard/planos">
+                  <Button size="sm" variant={remaining === 0 ? "default" : "outline"} className="whitespace-nowrap">
+                    {remaining === 0 ? "Liberar Gerações" : "Ver Planos"}
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {isLoadingStats ? (
           <>
             {[1, 2, 3, 4].map((i) => (
-              <Card key={i} className="bg-card shadow-lg">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                  <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
-                  <div className="w-10 h-10 bg-muted rounded-xl animate-pulse"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-8 w-20 bg-muted rounded mb-2 animate-pulse"></div>
-                  <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
+              <Card key={i} className="bg-card border-border/50">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-4 w-20 bg-muted rounded animate-pulse"></div>
+                    <div className="w-9 h-9 bg-muted rounded-lg animate-pulse"></div>
+                  </div>
+                  <div className="h-8 w-16 bg-muted rounded mb-2 animate-pulse"></div>
+                  <div className="h-3 w-28 bg-muted rounded animate-pulse"></div>
                 </CardContent>
               </Card>
             ))}
@@ -337,31 +342,36 @@ export default function DashboardPage() {
             return (
               <Card
                 key={stat.title}
-                className="bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className={`bg-card border-border/50 hover:border-primary/30 transition-all duration-200 ${stat.comingSoon ? 'opacity-60' : ''}`}
               >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
-                  <div className={`w-10 h-10 ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}>
-                    <Icon className={`h-5 w-5 ${stat.comingSoon ? 'text-muted-foreground' : 'text-white'}`} />
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-medium text-muted-foreground">{stat.title}</span>
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${stat.comingSoon ? 'bg-muted' : 'bg-primary/10 border border-primary/20'}`}>
+                      <Icon className={`h-4 w-4 ${stat.comingSoon ? 'text-muted-foreground' : 'text-primary'}`} />
+                    </div>
                   </div>
-                </CardHeader>
-                <CardContent>
                   {stat.comingSoon ? (
                     <>
-                      <div className="text-2xl font-bold text-muted-foreground mb-2">Em breve</div>
-                      <div className="flex items-center space-x-1 text-sm">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
+                      <div className="text-xl font-bold text-muted-foreground mb-1">Em breve</div>
+                      <div className="flex items-center gap-1 text-xs">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
                         <span className="text-muted-foreground">Requer integração</span>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="text-3xl font-bold text-foreground mb-2">{stat.value}</div>
-                      {stat.change && (
-                        <div className="flex items-center space-x-1 text-sm">
-                          <ArrowUpRight className={`h-4 w-4 ${stat.changeType === 'positive' ? 'text-primary' : 'text-red-500'}`} />
-                          <span className={`font-semibold ${stat.changeType === 'positive' ? 'text-primary' : 'text-red-500'}`}>{stat.change}</span>
+                      <div className="text-3xl font-bold text-foreground mb-1">{stat.value}</div>
+                      {stat.change && stat.change !== "+0%" && stat.change !== "0%" ? (
+                        <div className="flex items-center gap-1 text-xs">
+                          <ArrowUpRight className={`h-3 w-3 ${stat.changeType === 'positive' ? 'text-emerald-500' : 'text-red-500'}`} />
+                          <span className={`font-semibold ${stat.changeType === 'positive' ? 'text-emerald-500' : 'text-red-500'}`}>{stat.change}</span>
                           <span className="text-muted-foreground">vs mês anterior</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-xs">
+                          <Activity className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-muted-foreground">Total acumulado</span>
                         </div>
                       )}
                     </>
@@ -374,163 +384,182 @@ export default function DashboardPage() {
       </div>
 
       <div>
-        <h2 className="text-2xl font-bold text-foreground mb-6">Ações Rápidas</h2>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="flex items-center gap-2 mb-5">
+          <Target className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-bold text-foreground">Ações Rápidas</h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
           {quickActions.map((action) => {
             const Icon = action.icon
+            const isDisabled = action.description === "Em breve"
             return (
-              <Card
-                key={action.title}
-                className="bg-card shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group overflow-hidden"
+              <Link 
+                key={action.title} 
+                href={isDisabled ? "#" : action.href}
+                className={isDisabled ? "cursor-not-allowed" : ""}
               >
-                <Link href={action.href}>
-                  <CardHeader className="p-6">
-                    <div className="flex items-start space-x-4">
+                <Card
+                  className={`bg-card border-border/50 transition-all duration-200 group overflow-hidden h-full ${
+                    isDisabled 
+                      ? 'opacity-50' 
+                      : 'hover:border-primary/30 hover:shadow-md cursor-pointer'
+                  }`}
+                >
+                  <CardContent className="p-5">
+                    <div className="flex items-center gap-4">
                       <div
-                        className={`w-14 h-14 rounded-2xl ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg`}
+                        className={`w-11 h-11 rounded-xl flex items-center justify-center transition-transform ${
+                          isDisabled 
+                            ? 'bg-muted' 
+                            : 'bg-primary/10 border border-primary/20 group-hover:scale-105'
+                        }`}
                       >
-                        <Icon className="w-7 h-7 text-white" />
+                        <Icon className={`w-5 h-5 ${isDisabled ? 'text-muted-foreground' : 'text-primary'}`} />
                       </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`font-semibold text-foreground mb-0.5 ${!isDisabled && 'group-hover:text-primary'} transition-colors`}>
                           {action.title}
-                        </CardTitle>
-                        <CardDescription className="text-muted-foreground text-base">{action.description}</CardDescription>
+                        </h3>
+                        <p className="text-sm text-muted-foreground truncate">{action.description}</p>
                       </div>
+                      {!isDisabled && (
+                        <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      )}
                     </div>
-                  </CardHeader>
-                </Link>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             )
           })}
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="bg-card shadow-lg">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center space-x-2 text-foreground">
-              <Activity className="w-6 h-6 text-primary" />
-              <span className="text-xl font-bold">Atividade Recente</span>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="bg-card border-border/50">
+          <CardHeader className="pb-3 border-b border-border/50">
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <Activity className="w-5 h-5 text-primary" />
+              <span className="text-lg font-semibold">Atividade Recente</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {isLoadingStats ? (
-              <div className="space-y-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex items-start space-x-4 p-4 rounded-xl animate-pulse">
-                    <div className="w-10 h-10 bg-muted rounded-xl"></div>
+              <div className="p-4 space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 animate-pulse">
+                    <div className="w-9 h-9 bg-muted rounded-lg"></div>
                     <div className="flex-1 space-y-2">
                       <div className="h-4 bg-muted rounded w-1/3"></div>
                       <div className="h-3 bg-muted rounded w-2/3"></div>
-                      <div className="h-3 bg-muted rounded w-1/4"></div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : recentActivities.length > 0 ? (
-              <div className="space-y-4">
+              <div className="divide-y divide-border/50">
                 {recentActivities.map((activity, index) => {
                   const Icon = activity.icon
                   return (
                     <div
                       key={index}
-                      className="flex items-start space-x-4 p-4 rounded-xl hover:bg-accent transition-colors"
+                      className="flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors"
                     >
-                      <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-primary" />
+                      <div className="w-9 h-9 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-4 h-4 text-primary" />
                       </div>
-                      <div className="flex-1 space-y-1">
-                        <p className="font-semibold text-foreground">{activity.action}</p>
-                        <p className="text-muted-foreground">{activity.description}</p>
-                        <p className="text-sm text-muted-foreground flex items-center">
-                          <Clock className="w-3 h-3 mr-1" />
-                          {activity.time}
-                        </p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground text-sm">{activity.action}</p>
+                        <p className="text-xs text-muted-foreground truncate">{activity.description}</p>
                       </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {activity.time}
+                      </span>
                     </div>
                   )
                 })}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                <p className="text-muted-foreground">Nenhuma atividade recente</p>
-                <p className="text-sm text-muted-foreground mt-2">Comece gerando sua primeira copy!</p>
+              <div className="text-center py-10 px-4">
+                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Activity className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">Nenhuma atividade recente</p>
+                <Link href="/dashboard/copy-generator">
+                  <Button variant="link" size="sm" className="mt-2 text-primary">
+                    Gerar sua primeira copy
+                  </Button>
+                </Link>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="bg-card shadow-lg" data-animate>
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center space-x-2 text-foreground">
-              <BarChart3 className="w-6 h-6 text-primary" />
-              <span className="text-xl font-bold">Performance dos Últimos 7 Dias</span>
+        <Card className="bg-card border-border/50" data-animate>
+          <CardHeader className="pb-3 border-b border-border/50">
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <BarChart3 className="w-5 h-5 text-primary" />
+              <span className="text-lg font-semibold">Performance (7 dias)</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-5">
             {isLoadingStats ? (
-              <div className="space-y-6">
-                <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                  <div className="h-3 bg-muted rounded"></div>
-                </div>
-                <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                  <div className="h-3 bg-muted rounded"></div>
-                </div>
-                <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                  <div className="h-3 bg-muted rounded"></div>
-                </div>
+              <div className="space-y-5">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-4 bg-muted rounded w-1/3"></div>
+                      <div className="h-4 bg-muted rounded w-12"></div>
+                    </div>
+                    <div className="h-2 bg-muted rounded"></div>
+                  </div>
+                ))}
               </div>
             ) : dashboardStats ? (
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-muted-foreground">Copies geradas</span>
-                    <span className="font-bold text-foreground text-lg">{dashboardStats.performance.copiesGenerated}</span>
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Copies geradas</span>
+                    <span className="font-semibold text-foreground">{dashboardStats.performance.copiesGenerated}</span>
                   </div>
                   <Progress 
                     value={dashboardStats.performance.copiesGenerated > 0 ? Math.min(100, (dashboardStats.performance.copiesGenerated / 30) * 100) : 0} 
-                    className="h-3" 
+                    className="h-2" 
                   />
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-muted-foreground">Taxa de sucesso</span>
-                    <span className="font-bold text-foreground text-lg">{dashboardStats.performance.successRate}%</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Taxa de sucesso</span>
+                    <span className="font-semibold text-foreground">{dashboardStats.performance.successRate}%</span>
                   </div>
-                  <Progress value={dashboardStats.performance.successRate} className="h-3" />
+                  <Progress value={dashboardStats.performance.successRate} className="h-2" />
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-muted-foreground">Produtos analisados</span>
-                    <span className="font-bold text-foreground text-lg">{dashboardStats.performance.productsAnalyzed}</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Ferramentas usadas</span>
+                    <span className="font-semibold text-foreground">{dashboardStats.performance.productsAnalyzed}</span>
                   </div>
                   <Progress 
                     value={dashboardStats.performance.productsAnalyzed > 0 ? Math.min(100, (dashboardStats.performance.productsAnalyzed / 15) * 100) : 0} 
-                    className="h-3" 
+                    className="h-2" 
                   />
                 </div>
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-muted-foreground">Nenhum dado disponível</p>
+                <p className="text-sm text-muted-foreground">Nenhum dado disponível</p>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      <Card className="bg-accent border border-border shadow-lg" data-animate>
+      <Card className="bg-gradient-to-br from-primary/5 via-background to-primary/10 border border-primary/20 shadow-lg" data-animate>
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-2 text-foreground">
-            <Users className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold">Insights e Recomendações</span>
+            <Sparkles className="w-6 h-6 text-primary" />
+            <span className="text-xl font-bold">Dica do Dia</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -538,10 +567,12 @@ export default function DashboardPage() {
             Para maximizar suas conversões, experimente diferentes variações de headlines para o mesmo produto. Nossa IA
             pode gerar múltiplas versões otimizadas que você pode testar.
           </p>
-          <Button className="font-semibold px-6 py-3">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Gerar Headlines Agora
-          </Button>
+          <Link href="/dashboard/copy-generator">
+            <Button className="font-semibold px-6 py-3 bg-primary hover:bg-primary/90">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Gerar Headlines Agora
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     </div>

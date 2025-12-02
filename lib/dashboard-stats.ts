@@ -45,9 +45,21 @@ export async function getDashboardMetrics(userId: string): Promise<DashboardMetr
   const lastMonthGenerations = lastMonthResult.count || 0
   const last7DaysGenerations = last7DaysResult.count || 0
 
-  const monthlyGrowth = lastMonthGenerations > 0
-    ? Math.round(((monthlyGenerations - lastMonthGenerations) / lastMonthGenerations) * 100)
-    : monthlyGenerations > 0 ? 100 : 0
+  // Calcular crescimento mensal de forma mais amigável
+  let monthlyGrowth: number
+  if (lastMonthGenerations === 0 && monthlyGenerations === 0) {
+    // Nenhuma geração em ambos os meses
+    monthlyGrowth = 0
+  } else if (lastMonthGenerations === 0) {
+    // Não tinha gerações no mês passado, tem agora = novo usuário ou retornou
+    monthlyGrowth = 100
+  } else if (monthlyGenerations === 0) {
+    // Tinha gerações no mês passado, nenhuma este mês = mostrar 0 ao invés de -100%
+    monthlyGrowth = 0
+  } else {
+    // Ambos os meses têm gerações - calcular crescimento real
+    monthlyGrowth = Math.round(((monthlyGenerations - lastMonthGenerations) / lastMonthGenerations) * 100)
+  }
 
   return {
     totalGenerations,
