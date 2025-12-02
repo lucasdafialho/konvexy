@@ -242,14 +242,14 @@ export default function ProductsPage() {
   return (
     <div className="space-y-6" data-animate>
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500/10 via-background to-amber-500/5 border border-orange-500/20 p-6 md:p-8">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/10 via-background to-violet-500/5 border border-purple-500/20 p-6 md:p-8">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-60 h-60 bg-violet-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
         
         <div className="relative z-10">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-lg shadow-orange-500/25">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 shadow-lg shadow-purple-500/25">
                 <Flame className="w-7 h-7 text-white" />
               </div>
               <div>
@@ -264,7 +264,7 @@ export default function ProductsPage() {
 
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur border border-border">
-                <Sparkles className="w-4 h-4 text-orange-500" />
+                <Sparkles className="w-4 h-4 text-purple-500" />
                 <span className="text-sm font-semibold">{filteredProducts.length} nichos</span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
@@ -282,7 +282,7 @@ export default function ProductsPage() {
                 placeholder="Buscar nichos, tags..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-11 bg-background/80 backdrop-blur border-border/50 focus:border-orange-500/50 focus:ring-orange-500/20"
+                className="pl-10 h-11 bg-background/80 backdrop-blur border-border/50 focus:border-purple-500/50 focus:ring-purple-500/20"
               />
               {searchTerm && (
                 <button 
@@ -333,7 +333,7 @@ export default function ProductsPage() {
       {/* Main Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Products List */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-4 min-w-0">
           {filteredProducts.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16 text-center">
@@ -344,12 +344,12 @@ export default function ProductsPage() {
             </Card>
           ) : (
             filteredProducts.map((product, index) => (
-              <Card 
-                key={product.id} 
+              <Card
+                key={product.id}
                 className={`group cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                  selectedProduct?.id === product.id 
-                    ? 'ring-2 ring-orange-500 border-orange-500/50 shadow-md' 
-                    : 'hover:border-orange-500/30'
+                  selectedProduct?.id === product.id
+                    ? 'ring-2 ring-purple-500 border-purple-500/50 shadow-md'
+                    : 'hover:border-purple-500/30'
                 }`}
                 onClick={() => setSelectedProduct(product)}
                 data-animate
@@ -360,13 +360,27 @@ export default function ProductsPage() {
                     {/* Score Circle */}
                     <div className="flex-shrink-0">
                       <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${
-                        product.demandScore >= 90 
-                          ? 'from-orange-500/20 to-amber-500/20 border-orange-500/30' 
-                          : product.demandScore >= 75 
-                            ? 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30' 
-                            : 'from-muted to-muted border-border'
+                        product.demandScore >= 90
+                          ? 'from-purple-400/30 to-violet-400/30 border-purple-400/40'
+                          : product.demandScore >= 80
+                            ? 'from-purple-500/25 to-violet-500/25 border-purple-500/35'
+                            : product.demandScore >= 70
+                              ? 'from-purple-600/25 to-violet-600/25 border-purple-600/35'
+                              : product.demandScore >= 60
+                                ? 'from-purple-700/25 to-violet-700/25 border-purple-700/35'
+                                : 'from-purple-800/25 to-violet-800/25 border-purple-800/35'
                       } border flex flex-col items-center justify-center`}>
-                        <span className={`text-xl font-bold ${getScoreColor(product.demandScore)}`}>
+                        <span className={`text-xl font-bold ${
+                          product.demandScore >= 90
+                            ? 'text-purple-400'
+                            : product.demandScore >= 80
+                              ? 'text-purple-500'
+                              : product.demandScore >= 70
+                                ? 'text-purple-600'
+                                : product.demandScore >= 60
+                                  ? 'text-purple-700'
+                                  : 'text-purple-800'
+                        }`}>
                           {product.demandScore}
                         </span>
                         <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">
@@ -384,14 +398,14 @@ export default function ProductsPage() {
                               {product.category}
                             </Badge>
                             {product.demandScore >= 90 && (
-                              <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] font-bold px-2 py-0.5 border-0">
+                              <Badge className="bg-gradient-to-r from-purple-500 to-violet-500 text-white text-[10px] font-bold px-2 py-0.5 border-0">
                                 <Flame className="w-3 h-3 mr-1" />
                                 HOT
                               </Badge>
                             )}
                             {getTrendIcon(product.trend)}
                           </div>
-                          <h3 className="font-semibold text-foreground group-hover:text-orange-500 transition-colors line-clamp-1">
+                          <h3 className="font-semibold text-foreground group-hover:text-purple-500 transition-colors line-clamp-1">
                             {product.title}
                           </h3>
                         </div>
@@ -443,11 +457,11 @@ export default function ProductsPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           {/* Selected Product Details */}
           {selectedProduct ? (
-            <Card className="sticky top-4 border-orange-500/30 overflow-hidden" data-animate>
-              <div className="h-2 bg-gradient-to-r from-orange-500 to-amber-500" />
+            <Card className="lg:sticky lg:top-4 border-purple-500/30 overflow-hidden" data-animate>
+              <div className="h-2 bg-gradient-to-r from-purple-500 to-violet-500" />
               <CardContent className="p-5 space-y-5">
                 {/* Header */}
                 <div>
@@ -471,13 +485,33 @@ export default function ProductsPage() {
                 {/* Metrics Grid */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 rounded-lg bg-muted/50 text-center">
-                    <div className={`text-2xl font-bold ${getScoreColor(selectedProduct.demandScore)}`}>
+                    <div className={`text-2xl font-bold ${
+                      selectedProduct.demandScore >= 90
+                        ? 'text-purple-400'
+                        : selectedProduct.demandScore >= 80
+                          ? 'text-purple-500'
+                          : selectedProduct.demandScore >= 70
+                            ? 'text-purple-600'
+                            : selectedProduct.demandScore >= 60
+                              ? 'text-purple-700'
+                              : 'text-purple-800'
+                    }`}>
                       {selectedProduct.demandScore}
                     </div>
                     <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Demanda</div>
                   </div>
                   <div className="p-3 rounded-lg bg-muted/50 text-center">
-                    <div className={`text-2xl font-bold ${getScoreColor(selectedProduct.validationScore)}`}>
+                    <div className={`text-2xl font-bold ${
+                      selectedProduct.validationScore >= 90
+                        ? 'text-purple-400'
+                        : selectedProduct.validationScore >= 80
+                          ? 'text-purple-500'
+                          : selectedProduct.validationScore >= 70
+                            ? 'text-purple-600'
+                            : selectedProduct.validationScore >= 60
+                              ? 'text-purple-700'
+                              : 'text-purple-800'
+                    }`}>
                       {selectedProduct.validationScore}
                     </div>
                     <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Validação</div>
@@ -544,7 +578,7 @@ export default function ProductsPage() {
 
                 {/* CTA */}
                 <Link href="/dashboard/copy-generator" className="block">
-                  <Button className="w-full h-11 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-lg shadow-orange-500/25 font-semibold">
+                  <Button className="w-full h-11 bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white shadow-lg shadow-purple-500/25 font-semibold">
                     <Sparkles className="w-4 h-4 mr-2" />
                     Gerar Copy
                     <ArrowRight className="w-4 h-4 ml-2" />
@@ -570,7 +604,7 @@ export default function ProductsPage() {
           <Card data-animate>
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="w-4 h-4 text-orange-500" />
+                <BarChart3 className="w-4 h-4 text-purple-500" />
                 <h3 className="font-semibold text-sm">Resumo do Mercado</h3>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -595,10 +629,10 @@ export default function ProductsPage() {
 
           {/* Pro Features */}
           {user?.plan !== "pro" && (
-            <Card className="bg-gradient-to-br from-orange-500/5 to-amber-500/5 border-orange-500/20" data-animate>
+            <Card className="bg-gradient-to-br from-purple-500/5 to-violet-500/5 border-purple-500/20" data-animate>
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <Crown className="w-5 h-5 text-orange-500" />
+                  <Crown className="w-5 h-5 text-purple-500" />
                   <h3 className="font-semibold text-sm">Recursos Pro</h3>
                 </div>
                 <div className="space-y-2.5 mb-4">
@@ -608,13 +642,13 @@ export default function ProductsPage() {
                     "Dados exclusivos"
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Zap className="w-3.5 h-3.5 text-orange-500" />
+                      <Zap className="w-3.5 h-3.5 text-purple-500" />
                       {feature}
                     </div>
                   ))}
                 </div>
                 <Link href="/dashboard/planos">
-                  <Button variant="outline" size="sm" className="w-full border-orange-500/30 hover:bg-orange-500/10">
+                  <Button variant="outline" size="sm" className="w-full border-purple-500/30 hover:bg-purple-500/10">
                     <ExternalLink className="w-3.5 h-3.5 mr-2" />
                     Ver Planos
                   </Button>

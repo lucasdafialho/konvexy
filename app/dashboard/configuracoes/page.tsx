@@ -450,7 +450,7 @@ export default function ConfiguracoesPage() {
                     <span>
                       {settings?.generationsThisMonth || 0} / {
                         settings?.profile.plan === 'free' ? '5' :
-                          settings?.profile.plan === 'starter' ? '50' :
+                          settings?.profile.plan === 'starter' ? '190' :
                             'Ilimitado'
                       }
                     </span>

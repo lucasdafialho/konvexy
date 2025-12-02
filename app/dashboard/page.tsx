@@ -296,7 +296,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-muted-foreground">
                   {user?.plan === "pro"
                     ? "Acesso ilimitado a todas as ferramentas"
-                    : `${remaining} de ${limit} restantes este mês`}
+                    : `${remaining} restantes este mês`}
                 </p>
               </div>
             </div>
