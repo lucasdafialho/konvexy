@@ -31,10 +31,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
   const initializingRef = useRef(false)
+  const skipNextAuthEvent = useRef(false)
 
   const loadUserProfile = useCallback(async (authUser: SupabaseUser): Promise<User> => {
     console.log('[AUTH] loadUserProfile chamado para:', authUser.email)
-    
+
     const defaultUser: User = {
       id: authUser.id,
       name: authUser.user_metadata?.name || authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
@@ -50,37 +51,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .select('id, name, email, plan, created_at, generations_used')
         .eq('id', authUser.id)
-        .maybeSingle()
+        .single()
 
       if (error) {
-        console.error('[AUTH] Erro ao buscar perfil:', error)
-        console.log('[AUTH] Tentando criar perfil...')
-        
-        const { error: upsertError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: authUser.id,
-            name: defaultUser.name,
-            email: defaultUser.email,
-            plan: 'free',
-            generations_used: 0
-          }, { onConflict: 'id' })
+        // Se o erro é NOT_FOUND, tenta criar o perfil
+        if (error.code === 'PGRST116') {
+          console.log('[AUTH] Perfil não encontrado, criando...')
 
-        if (upsertError) {
-          console.error('[AUTH] Erro ao criar perfil:', upsertError)
-        } else {
-          console.log('[AUTH] Perfil criado com sucesso')
+          const { error: upsertError } = await supabase
+            .from('profiles')
+            .upsert({
+              id: authUser.id,
+              name: defaultUser.name,
+              email: defaultUser.email,
+              plan: 'free',
+              generations_used: 0
+            }, { onConflict: 'id' })
+
+          if (upsertError) {
+            console.error('[AUTH] Erro ao criar perfil:', upsertError)
+          } else {
+            console.log('[AUTH] Perfil criado com sucesso')
+          }
+
+          return defaultUser
         }
 
+        // Outro tipo de erro
+        console.error('[AUTH] Erro ao buscar perfil:', error)
         return defaultUser
       }
 
-      if (!profile) {
-        console.log('[AUTH] Perfil não encontrado, usando dados padrão')
-        return defaultUser
-      }
-
-      console.log('[AUTH] Perfil encontrado:', profile)
+      console.log('[AUTH] Perfil encontrado')
       return {
         id: profile.id,
         name: profile.name,
@@ -175,9 +177,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('[AUTH] Evento de autenticação:', event)
-      
+
       if (!mounted || !isInitialized) {
         console.log('[AUTH] Ignorando evento - componente não montado ou não inicializado')
+        return
+      }
+
+      // Se devemos pular o próximo evento (já processado manualmente)
+      if (skipNextAuthEvent.current && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
+        console.log('[AUTH] Pulando evento (já processado manualmente):', event)
+        skipNextAuthEvent.current = false
         return
       }
 
@@ -187,13 +196,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')) {
+      if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
         console.log('[AUTH] Atualizando perfil do usuário...')
         const userProfile = await loadUserProfile(session.user)
         if (mounted) {
           setUser(userProfile)
           console.log('[AUTH] Perfil atualizado')
         }
+      } else if (session?.user && event === 'USER_UPDATED') {
+        // Para USER_UPDATED, apenas atualiza o user sem recarregar perfil do banco
+        console.log('[AUTH] USER_UPDATED - mantendo perfil atual sem reload')
       } else if (!session?.user) {
         console.log('[AUTH] Sessão removida')
         setUser(null)
@@ -217,7 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) {
       console.error('[AUTH] Erro no login:', error)
-      
+
       // Mensagens de erro amigáveis
       if (error.message.includes('Invalid login credentials')) {
         throw new Error('Email ou senha incorretos. Verifique seus dados e tente novamente.')
@@ -228,19 +240,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error.message.includes('Too many requests')) {
         throw new Error('Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.')
       }
-      
+
       throw new Error('Erro ao fazer login. Por favor, tente novamente.')
     }
 
     if (data.session?.user) {
       console.log('[AUTH] Login bem-sucedido!')
-      console.log('[AUTH] Sessão:', data.session)
-      console.log('[AUTH] Usuário:', data.session.user)
       console.log('[AUTH] Carregando perfil...')
-      
+
+      // Marca para pular o próximo evento SIGNED_IN (já estamos processando aqui)
+      skipNextAuthEvent.current = true
+
       const userProfile = await loadUserProfile(data.session.user)
       console.log('[AUTH] Perfil carregado:', userProfile)
-      
+
       setUser(userProfile)
       setIsLoading(false)
       console.log('[AUTH] Estado atualizado, login completo!')

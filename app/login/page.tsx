@@ -57,18 +57,13 @@ export default function LoginPage() {
 
     try {
       console.log('[LOGIN PAGE] Iniciando login...')
-      
+
       // Faz o login diretamente
       await login(email, password)
-      
-      console.log('[LOGIN PAGE] Login concluído, aguardando...')
-      
-      // Aguarda um pouco para garantir que a sessão foi criada
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      console.log('[LOGIN PAGE] Redirecionando para dashboard...')
-      
-      // Força reload da página para garantir que o middleware pegue a sessão
+
+      console.log('[LOGIN PAGE] Login concluído, redirecionando...')
+
+      // Redireciona imediatamente para o dashboard
       window.location.href = '/dashboard'
     } catch (err) {
       console.error('[LOGIN PAGE] Erro no login:', err)

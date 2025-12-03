@@ -32,9 +32,6 @@ export default function ResetPasswordPage() {
         console.log("🔗 [RESET] URL completa:", window.location.href)
         console.log("🔗 [RESET] Hash:", window.location.hash)
 
-        // Aguarda um pouco para garantir que o Supabase processou o hash
-        await new Promise(resolve => setTimeout(resolve, 500))
-
         // Primeiro, verifica se há um hash fragment na URL (Supabase envia o token assim)
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
@@ -166,14 +163,26 @@ export default function ResetPasswordPage() {
       setSuccess(true)
       setIsLoading(false)
 
-      // Redireciona para o login após 3 segundos
+      // Redireciona para o login imediatamente após mostrar sucesso
       setTimeout(() => {
         console.log("🔀 [RESET] Redirecionando para login...")
         router.push("/login")
-      }, 3000)
+      }, 1500)
     } catch (err: any) {
       console.error("❌ [RESET] Erro ao redefinir senha:", err)
-      setError(err.message || "Erro ao redefinir senha. Tente novamente.")
+
+      // Mensagens de erro específicas
+      let errorMessage = "Erro ao redefinir senha. Tente novamente."
+
+      if (err.message?.includes("New password should be different")) {
+        errorMessage = "A nova senha deve ser diferente da senha anterior."
+      } else if (err.message?.includes("same as the old password")) {
+        errorMessage = "A nova senha deve ser diferente da senha anterior."
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+
+      setError(errorMessage)
       setIsLoading(false)
     }
   }
