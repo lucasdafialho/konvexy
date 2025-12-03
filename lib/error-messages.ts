@@ -69,10 +69,23 @@ export function getErrorMessage(error: unknown): string {
   return ERROR_MESSAGES.default
 }
 
-// Valida email
+// Valida email com regex robusto
 export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
+  // Regex mais robusto que valida:
+  // - Parte local: letras, números, pontos, hífens, underscores
+  // - @ obrigatório
+  // - Domínio: letras, números, hífens
+  // - Ponto obrigatório
+  // - Extensão: 2-6 caracteres (com, br, info, etc)
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/
+
+  // Validações adicionais
+  if (!email || email.trim() === '') return false
+  if (email.length > 254) return false // RFC 5321
+  if (email.startsWith('.') || email.endsWith('.')) return false
+  if (email.includes('..')) return false // Pontos consecutivos não permitidos
+
+  return emailRegex.test(email.trim())
 }
 
 // Valida senha com requisitos detalhados
