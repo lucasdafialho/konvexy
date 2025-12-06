@@ -4,10 +4,9 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Sparkles, Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Sparkles, PenTool, Target, BarChart3 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
@@ -35,7 +34,6 @@ export default function LoginPage() {
     setIsLoading(true)
     setError("")
 
-    // Validações no frontend
     if (!email || !password) {
       setError("Por favor, preencha email e senha.")
       setIsLoading(false)
@@ -43,27 +41,20 @@ export default function LoginPage() {
     }
 
     if (!isValidEmail(email)) {
-      setError("Por favor, insira um email válido.")
+      setError("Por favor, insira um email valido.")
       setIsLoading(false)
       return
     }
 
     const passwordValidation = isValidPassword(password)
     if (!passwordValidation.valid) {
-      setError(passwordValidation.message || "Senha inválida.")
+      setError(passwordValidation.message || "Senha invalida.")
       setIsLoading(false)
       return
     }
 
     try {
-      console.log('[LOGIN PAGE] Iniciando login...')
-
-      // Faz o login diretamente
       await login(email, password)
-
-      console.log('[LOGIN PAGE] Login concluído, redirecionando...')
-
-      // Redireciona imediatamente para o dashboard
       window.location.href = '/dashboard'
     } catch (err) {
       console.error('[LOGIN PAGE] Erro no login:', err)
@@ -73,37 +64,116 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex items-center justify-center mb-8">
-          <img src="/konvexy/konvexy-logo.png" alt="Konvexy" className="h-36 w-auto" />
+    <div className="min-h-screen bg-background flex">
+      {/* Left Side - Visual */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/5 via-background to-purple-500/5 relative overflow-hidden">
+        {/* Subtle gradient orb */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full blur-[100px] opacity-60" />
+
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+          {/* Logo */}
+          <Link href="/">
+            <img
+              src="/konvexy/konvexy-logo-transparent.png"
+              alt="Konvexy"
+              className="h-9 w-auto"
+            />
+          </Link>
+
+          {/* Center Content */}
+          <div className="max-w-lg">
+            <h1 className="text-4xl font-bold text-foreground mb-6 leading-tight">
+              Marketing inteligente,<br />
+              <span className="text-primary">resultados reais.</span>
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Acesse sua conta e continue criando conteudo que converte com o poder da inteligencia artificial.
+            </p>
+
+            {/* Feature Icons */}
+            <div className="mt-12 grid grid-cols-2 gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <PenTool className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-sm text-muted-foreground">Copies persuasivas</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-sm text-muted-foreground">Estrategias de Ads</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-sm text-muted-foreground">Funis de vendas</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-sm text-muted-foreground">IA especializada</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Konvexy. Todos os direitos reservados.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side - Form */}
+      <div className="flex-1 flex flex-col bg-background">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between p-6">
+          <Link href="/" className="lg:hidden">
+            <img
+              src="/konvexy/konvexy-logo-transparent.png"
+              alt="Konvexy"
+              className="h-8 w-auto"
+            />
+          </Link>
+          <Link
+            href="/"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors ml-auto"
+          >
+            ← Voltar ao site
+          </Link>
         </div>
 
-        <Card className="border-0 shadow-xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Bem-vindo de volta</CardTitle>
-            <CardDescription>Entre na sua conta para continuar</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <GoogleAuthButton mode="signin" className="w-full" />
-            
-            <div className="relative my-6">
+        {/* Form Container */}
+        <div className="flex-1 flex items-center justify-center px-6 pb-12">
+          <div className="w-full max-w-[400px]">
+            {/* Header */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-foreground">Bem-vindo de volta</h2>
+              <p className="text-muted-foreground mt-2">
+                Entre na sua conta para continuar
+              </p>
+            </div>
+
+            {/* Google Auth */}
+            <GoogleAuthButton mode="signin" className="w-full h-12 rounded-lg" />
+
+            {/* Divider */}
+            <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <div className="w-full border-t border-border" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Ou continue com email</span>
+              <div className="relative flex justify-center">
+                <span className="bg-background px-4 text-sm text-muted-foreground">ou continue com email</span>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="p-4 text-sm text-destructive-foreground bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                  <span className="flex-1">{error}</span>
+                <div className="p-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg">
+                  {error}
                 </div>
               )}
 
@@ -112,76 +182,72 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-11"
+                  className="h-12 rounded-lg"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Senha</Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Esqueceu a senha?
+                  </Link>
+                </div>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Sua senha"
+                    placeholder="Digite sua senha"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-11 pr-10"
+                    className="h-12 rounded-lg pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="remember"
-                    className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
-                  />
-                  <Label htmlFor="remember" className="text-sm">
-                    Lembrar de mim
-                  </Label>
-                </div>
-                <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-                  Esqueceu a senha?
-                </Link>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="remember"
+                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                />
+                <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground cursor-pointer">
+                  Manter conectado
+                </Label>
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="w-full h-12 rounded-lg text-base font-medium"
                 disabled={isLoading}
               >
                 {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                Não tem uma conta?{" "}
-                <Link href="/register" className="text-primary hover:underline font-medium">
-                  Criar conta
-                </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="mt-8 text-center">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-            ← Voltar para o site
-          </Link>
+            {/* Sign Up Link */}
+            <p className="mt-8 text-center text-muted-foreground">
+              Nao tem uma conta?{" "}
+              <Link href="/register" className="text-primary hover:text-primary/80 font-medium transition-colors">
+                Criar conta gratuita
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

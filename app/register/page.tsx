@@ -4,10 +4,10 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Sparkles, Eye, EyeOff, CheckCircle, X } from "lucide-react"
+import { Eye, EyeOff, CheckCircle, X, Zap, Shield, Clock } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
@@ -53,7 +53,6 @@ export default function RegisterPage() {
     setIsLoading(true)
     setError("")
 
-    // Validações no frontend
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       setError("Por favor, preencha todos os campos.")
       setIsLoading(false)
@@ -62,25 +61,24 @@ export default function RegisterPage() {
 
     const nameValidation = isValidName(formData.name)
     if (!nameValidation.valid) {
-      setError(nameValidation.message || "Nome inválido.")
+      setError(nameValidation.message || "Nome invalido.")
       setIsLoading(false)
       return
     }
 
     if (!isValidEmail(formData.email)) {
-      setError("Por favor, insira um email válido.")
+      setError("Por favor, insira um email valido.")
       setIsLoading(false)
       return
     }
 
     const passwordValidation = isValidPassword(formData.password)
     if (!passwordValidation.valid) {
-      setError(passwordValidation.message || "Senha inválida.")
+      setError(passwordValidation.message || "Senha invalida.")
       setIsLoading(false)
       return
     }
 
-    // Verifica requisitos mínimos de segurança e mostra o que está faltando
     const passwordError = getPasswordErrorMessage(formData.password)
     if (passwordError) {
       setError(passwordError)
@@ -89,26 +87,24 @@ export default function RegisterPage() {
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("As senhas não coincidem.")
+      setError("As senhas nao coincidem.")
       setIsLoading(false)
       return
     }
 
     if (!acceptTerms) {
-      setError("Você deve aceitar os Termos de Uso e a Política de Privacidade.")
+      setError("Voce deve aceitar os Termos de Uso e a Politica de Privacidade.")
       setIsLoading(false)
       return
     }
 
     try {
       const result = await register(formData.name, formData.email, formData.password)
-      
+
       if (result.needsEmailConfirmation) {
-        // Mostrar modal de confirmação de email
         setShowEmailConfirmation(true)
         setIsLoading(false)
       } else {
-        // Login automático bem-sucedido, aguardar e redirecionar
         await new Promise(resolve => setTimeout(resolve, 500))
         router.push("/dashboard")
       }
@@ -123,36 +119,119 @@ export default function RegisterPage() {
   const passwordStrengthInfo = getPasswordStrength(formData.password)
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-center mb-8">
-          <img src="/konvexy/konvexy-logo.png" alt="Konvexy" className="h-36 w-auto" />
+    <div className="min-h-screen bg-background flex">
+      {/* Left Side - Visual */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/5 via-background to-purple-500/5 relative overflow-hidden">
+        {/* Subtle gradient orb */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full blur-[100px] opacity-60" />
+
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+          {/* Logo */}
+          <Link href="/">
+            <img
+              src="/konvexy/konvexy-logo-transparent.png"
+              alt="Konvexy"
+              className="h-9 w-auto"
+            />
+          </Link>
+
+          {/* Center Content */}
+          <div className="max-w-lg">
+            <h1 className="text-4xl font-bold text-foreground mb-6 leading-tight">
+              Transforme ideias em<br />
+              <span className="text-primary">conteudo que vende.</span>
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed mb-12">
+              Crie sua conta e comece a gerar copies, estrategias de ads e funis de vendas com inteligencia artificial.
+            </p>
+
+            {/* Benefits */}
+            <div className="space-y-5">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Zap className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Comece gratis</p>
+                  <p className="text-sm text-muted-foreground">5 geracoes para testar a plataforma</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Pronto em minutos</p>
+                  <p className="text-sm text-muted-foreground">Sem configuracoes complicadas</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Shield className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Garantia de 7 dias</p>
+                  <p className="text-sm text-muted-foreground">Nao gostou? Devolvemos seu dinheiro</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Konvexy. Todos os direitos reservados.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side - Form */}
+      <div className="flex-1 flex flex-col bg-background overflow-y-auto">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between p-6">
+          <Link href="/" className="lg:hidden">
+            <img
+              src="/konvexy/konvexy-logo-transparent.png"
+              alt="Konvexy"
+              className="h-8 w-auto"
+            />
+          </Link>
+          <Link
+            href="/"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors ml-auto"
+          >
+            ← Voltar ao site
+          </Link>
         </div>
 
-        <Card className="border-0 shadow-xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Criar sua conta</CardTitle>
-            <CardDescription>Comece sua jornada no marketing digital</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <GoogleAuthButton mode="signup" className="w-full" />
-            
-            <div className="relative my-6">
+        {/* Form Container */}
+        <div className="flex-1 flex items-center justify-center px-6 py-8">
+          <div className="w-full max-w-[400px]">
+            {/* Header */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-foreground">Criar sua conta</h2>
+              <p className="text-muted-foreground mt-2">
+                Preencha os dados para comecar
+              </p>
+            </div>
+
+            {/* Google Auth */}
+            <GoogleAuthButton mode="signup" className="w-full h-12 rounded-lg" />
+
+            {/* Divider */}
+            <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <div className="w-full border-t border-border" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Ou continue com email</span>
+              <div className="relative flex justify-center">
+                <span className="bg-background px-4 text-sm text-muted-foreground">ou continue com email</span>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="p-4 text-sm text-destructive-foreground bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                  <span className="flex-1">{error}</span>
+                <div className="p-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg">
+                  {error}
                 </div>
               )}
 
@@ -166,7 +245,7 @@ export default function RegisterPage() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="h-11"
+                  className="h-12 rounded-lg"
                 />
               </div>
 
@@ -180,7 +259,7 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="h-11"
+                  className="h-12 rounded-lg"
                 />
               </div>
 
@@ -191,86 +270,51 @@ export default function RegisterPage() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Crie uma senha forte"
+                    placeholder="Crie uma senha"
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="h-11 pr-10"
+                    className="h-12 rounded-lg pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                
+
                 {formData.password && (
-                  <div className="space-y-2 mt-3">
-                    {/* Barra de força da senha */}
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 flex gap-1">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                          <div
-                            key={level}
-                            className={`h-1.5 flex-1 rounded-full transition-all ${
-                              passwordStrengthInfo.strength >= level
-                                ? passwordStrengthInfo.color
-                                : "bg-muted"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      {passwordStrengthInfo.label && (
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {passwordStrengthInfo.label}
-                        </span>
-                      )}
+                  <div className="mt-3 p-4 bg-muted/30 rounded-lg space-y-3">
+                    <div className="flex gap-1.5">
+                      {[1, 2, 3, 4, 5].map((level) => (
+                        <div
+                          key={level}
+                          className={`h-1.5 flex-1 rounded-full transition-all ${
+                            passwordStrengthInfo.strength >= level
+                              ? passwordStrengthInfo.color
+                              : "bg-muted"
+                          }`}
+                        />
+                      ))}
                     </div>
-                    
-                    {/* Requisitos da senha */}
-                    <div className="space-y-1.5 text-xs">
-                      <div className={`flex items-center gap-2 ${passwordReqs.minLength ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
-                        {passwordReqs.minLength ? (
-                          <CheckCircle className="w-3.5 h-3.5" />
-                        ) : (
-                          <div className="w-3.5 h-3.5 rounded-full border-2 border-current" />
-                        )}
-                        <span>Mínimo de 8 caracteres</span>
-                      </div>
-                      <div className={`flex items-center gap-2 ${passwordReqs.hasUpperCase ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
-                        {passwordReqs.hasUpperCase ? (
-                          <CheckCircle className="w-3.5 h-3.5" />
-                        ) : (
-                          <div className="w-3.5 h-3.5 rounded-full border-2 border-current" />
-                        )}
-                        <span>Uma letra maiúscula (A-Z)</span>
-                      </div>
-                      <div className={`flex items-center gap-2 ${passwordReqs.hasLowerCase ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
-                        {passwordReqs.hasLowerCase ? (
-                          <CheckCircle className="w-3.5 h-3.5" />
-                        ) : (
-                          <div className="w-3.5 h-3.5 rounded-full border-2 border-current" />
-                        )}
-                        <span>Uma letra minúscula (a-z)</span>
-                      </div>
-                      <div className={`flex items-center gap-2 ${passwordReqs.hasNumber ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
-                        {passwordReqs.hasNumber ? (
-                          <CheckCircle className="w-3.5 h-3.5" />
-                        ) : (
-                          <div className="w-3.5 h-3.5 rounded-full border-2 border-current" />
-                        )}
-                        <span>Um número (0-9)</span>
-                      </div>
-                      <div className={`flex items-center gap-2 ${passwordReqs.hasSpecialChar ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
-                        {passwordReqs.hasSpecialChar ? (
-                          <CheckCircle className="w-3.5 h-3.5" />
-                        ) : (
-                          <div className="w-3.5 h-3.5 rounded-full border-2 border-current" />
-                        )}
-                        <span>Um caractere especial (!@#$%^&*...)</span>
-                      </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <span className={passwordReqs.minLength ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}>
+                        {passwordReqs.minLength ? '✓' : '○'} 8+ caracteres
+                      </span>
+                      <span className={passwordReqs.hasUpperCase ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}>
+                        {passwordReqs.hasUpperCase ? '✓' : '○'} Letra maiuscula
+                      </span>
+                      <span className={passwordReqs.hasLowerCase ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}>
+                        {passwordReqs.hasLowerCase ? '✓' : '○'} Letra minuscula
+                      </span>
+                      <span className={passwordReqs.hasNumber ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}>
+                        {passwordReqs.hasNumber ? '✓' : '○'} Numero
+                      </span>
+                      <span className={`col-span-2 ${passwordReqs.hasSpecialChar ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
+                        {passwordReqs.hasSpecialChar ? '✓' : '○'} Caractere especial (!@#$%...)
+                      </span>
                     </div>
                   </div>
                 )}
@@ -287,79 +331,72 @@ export default function RegisterPage() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
-                    className="h-11 pr-10"
+                    className="h-12 rounded-lg pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {formData.confirmPassword && formData.password === formData.confirmPassword && (
-                  <div className="flex items-center space-x-2 text-green-600">
+                  <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1.5 mt-2">
                     <CheckCircle className="w-4 h-4" />
-                    <span className="text-sm">Senhas coincidem</span>
-                  </div>
+                    Senhas coincidem
+                  </p>
                 )}
               </div>
 
-              <div className="flex items-start space-x-2">
+              <div className="flex items-start gap-3">
                 <input
                   type="checkbox"
                   id="terms"
                   checked={acceptTerms}
                   onChange={(e) => setAcceptTerms(e.target.checked)}
-                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2 mt-0.5"
+                  className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary"
                 />
-                <label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer text-foreground">
-                  Eu aceito os {""}
+                <label htmlFor="terms" className="text-sm text-muted-foreground cursor-pointer leading-relaxed">
+                  Concordo com os{" "}
                   <button
                     type="button"
                     onClick={() => setIsTermsOpen(true)}
-                    className="text-primary hover:underline underline-offset-2"
+                    className="text-primary hover:underline"
                   >
                     Termos de Uso
                   </button>{" "}
-                  e {""}
+                  e a{" "}
                   <button
                     type="button"
                     onClick={() => setIsPrivacyOpen(true)}
-                    className="text-primary hover:underline underline-offset-2"
+                    className="text-primary hover:underline"
                   >
-                    Política de Privacidade
+                    Politica de Privacidade
                   </button>
                 </label>
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="w-full h-12 rounded-lg text-base font-medium"
                 disabled={isLoading || csrfLoading}
               >
-                {isLoading ? "Criando conta..." : csrfLoading ? "Carregando..." : "Criar conta"}
+                {isLoading ? "Criando conta..." : "Criar conta gratuita"}
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                Já tem uma conta?{" "}
-                <Link href="/login" className="text-primary hover:underline font-medium">
-                  Fazer login
-                </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="mt-8 text-center">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-            ← Voltar para o site
-          </Link>
+            {/* Login Link */}
+            <p className="mt-8 text-center text-muted-foreground">
+              Ja tem uma conta?{" "}
+              <Link href="/login" className="text-primary hover:text-primary/80 font-medium transition-colors">
+                Entrar
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
-      
+
       {showEmailConfirmation && (
         <EmailConfirmationModal
           email={formData.email}
@@ -369,100 +406,65 @@ export default function RegisterPage() {
           }}
         />
       )}
-      
+
       {isTermsOpen && (
         <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setIsTermsOpen(false)} />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsTermsOpen(false)} />
           <div className="relative w-full max-w-2xl">
-            <Card className="border-0 shadow-2xl">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Termos de Uso</CardTitle>
-                <CardAction>
-                  <Button variant="ghost" size="icon" aria-label="Fechar" onClick={() => setIsTermsOpen(false)}>
-                    <X className="w-4 h-4" />
-                  </Button>
-                </CardAction>
+            <Card className="border-border">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Termos de Uso</CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => setIsTermsOpen(false)}>
+                  <X className="w-5 h-5" />
+                </Button>
               </CardHeader>
-              <CardContent className="max-h-[70vh] overflow-y-auto space-y-4 text-sm leading-relaxed text-muted-foreground">
-                <h3 className="text-foreground font-semibold">1. Aceitação dos Termos</h3>
-                <p>Ao criar uma conta e utilizar a Konvexy, você concorda integralmente com estes Termos de Uso. Caso não concorde com qualquer condição, não utilize a plataforma.</p>
-                <h3 className="text-foreground font-semibold">2. Cadastro e Conta</h3>
-                <p>Para acessar os recursos, você deve fornecer informações verdadeiras, precisas e atualizadas. Você é responsável por manter a confidencialidade de suas credenciais e por todas as atividades realizadas em sua conta.</p>
-                <h3 className="text-foreground font-semibold">3. Uso Permitido</h3>
-                <p>Você se compromete a utilizar a plataforma de forma lícita, respeitando a legislação aplicável, estes Termos e os direitos de terceiros. É proibido realizar engenharia reversa, explorar vulnerabilidades, automatizar abusivamente o uso ou prejudicar a disponibilidade do serviço.</p>
-                <h3 className="text-foreground font-semibold">4. Planos, Pagamentos e Cancelamento</h3>
-                <p>Planos pagos, quando oferecidos, podem ser cobrados de forma recorrente. Cancelamentos interrompem cobranças futuras, mantendo o acesso até o fim do ciclo vigente. Valores e benefícios podem ser alterados com aviso prévio.</p>
-                <h3 className="text-foreground font-semibold">5. Propriedade Intelectual</h3>
-                <p>Todo o conteúdo, marca, layout e tecnologia da Konvexy pertencem à empresa ou a seus licenciadores. É vedada a reprodução, distribuição ou criação de obras derivadas sem autorização.</p>
-                <h3 className="text-foreground font-semibold">6. Conteúdos Gerados por IA</h3>
-                <p>Os textos e sugestões gerados por inteligência artificial são fornecidos no estado em que se encontram. Você é responsável por revisar, adaptar e garantir que estejam em conformidade com as leis e com sua finalidade de uso.</p>
-                <h3 className="text-foreground font-semibold">7. Limitação de Responsabilidade</h3>
-                <p>Na máxima extensão permitida por lei, a Konvexy não se responsabiliza por lucros cessantes, danos indiretos, perda de dados ou indisponibilidade ocasionais. Empregamos boas práticas para manter a continuidade e segurança do serviço.</p>
-                <h3 className="text-foreground font-semibold">8. Suspensão e Encerramento</h3>
-                <p>Podemos suspender ou encerrar contas que violem estes Termos, leis ou políticas internas. Você pode encerrar sua conta a qualquer momento, observadas as obrigações pendentes.</p>
-                <h3 className="text-foreground font-semibold">9. Privacidade</h3>
-                <p>O tratamento de dados pessoais observa a nossa Política de Privacidade. Ao utilizar a plataforma, você declara ciência e concordância com essa política.</p>
-                <h3 className="text-foreground font-semibold">10. Alterações destes Termos</h3>
-                <p>Podemos atualizar estes Termos a qualquer momento. Alterações passam a valer a partir da publicação. O uso contínuo do serviço após a atualização representa concordância com os novos termos.</p>
-                <h3 className="text-foreground font-semibold">11. Legislação e Foro</h3>
-                <p>Estes Termos são regidos pelas leis do Brasil. Fica eleito o foro de seu domicílio para resolver eventuais controvérsias, salvo disposições legais em contrário.</p>
-                <h3 className="text-foreground font-semibold">12. Contato</h3>
-                <p>Em caso de dúvidas, entre em contato pelo e-mail suporte@marketpro.com.</p>
+              <CardContent className="max-h-[70vh] overflow-y-auto space-y-4 text-sm text-muted-foreground">
+                <h3 className="text-foreground font-medium">1. Aceitacao dos Termos</h3>
+                <p>Ao criar uma conta e utilizar a Konvexy, voce concorda integralmente com estes Termos de Uso.</p>
+                <h3 className="text-foreground font-medium">2. Cadastro e Conta</h3>
+                <p>Para acessar os recursos, voce deve fornecer informacoes verdadeiras, precisas e atualizadas.</p>
+                <h3 className="text-foreground font-medium">3. Uso Permitido</h3>
+                <p>Voce se compromete a utilizar a plataforma de forma licita, respeitando a legislacao aplicavel.</p>
+                <h3 className="text-foreground font-medium">4. Planos e Pagamentos</h3>
+                <p>Planos pagos podem ser cobrados de forma recorrente. Cancelamentos interrompem cobrancas futuras.</p>
+                <h3 className="text-foreground font-medium">5. Propriedade Intelectual</h3>
+                <p>Todo o conteudo, marca e tecnologia da Konvexy pertencem a empresa ou a seus licenciadores.</p>
+                <h3 className="text-foreground font-medium">6. Conteudos Gerados por IA</h3>
+                <p>Os textos gerados sao fornecidos no estado em que se encontram. Voce e responsavel por revisar e adaptar.</p>
+                <h3 className="text-foreground font-medium">7. Contato</h3>
+                <p>Em caso de duvidas, entre em contato pelo e-mail contato@konvexy.com.</p>
               </CardContent>
             </Card>
           </div>
         </div>
       )}
+
       {isPrivacyOpen && (
         <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setIsPrivacyOpen(false)} />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsPrivacyOpen(false)} />
           <div className="relative w-full max-w-2xl">
-            <Card className="border-0 shadow-2xl">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Política de Privacidade</CardTitle>
-                <CardAction>
-                  <Button variant="ghost" size="icon" aria-label="Fechar" onClick={() => setIsPrivacyOpen(false)}>
-                    <X className="w-4 h-4" />
-                  </Button>
-                </CardAction>
+            <Card className="border-border">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Politica de Privacidade</CardTitle>
+                <Button variant="ghost" size="icon" onClick={() => setIsPrivacyOpen(false)}>
+                  <X className="w-5 h-5" />
+                </Button>
               </CardHeader>
-              <CardContent className="max-h-[70vh] overflow-y-auto space-y-4 text-sm leading-relaxed text-muted-foreground">
-                <h3 className="text-foreground font-semibold">1. Introdução</h3>
-                <p>Esta Política de Privacidade descreve como a Konvexy coleta, utiliza e protege seus dados pessoais de acordo com a legislação aplicável, incluindo a Lei Geral de Proteção de Dados (LGPD).</p>
-                <h3 className="text-foreground font-semibold">2. Dados que Coletamos</h3>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>Dados de cadastro: nome, e-mail, senha e informações de contato.</li>
-                  <li>Dados de uso: páginas acessadas, funcionalidades utilizadas e métricas de desempenho.</li>
-                  <li>Dados técnicos: endereço IP, dispositivo, navegador e cookies.</li>
-                </ul>
-                <h3 className="text-foreground font-semibold">3. Bases Legais</h3>
-                <p>Tratamos dados com base em execução de contrato, cumprimento de obrigação legal, legítimo interesse e consentimento, quando aplicável.</p>
-                <h3 className="text-foreground font-semibold">4. Como Utilizamos os Dados</h3>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>Para autenticação, suporte e comunicação com o usuário.</li>
-                  <li>Para melhorar a plataforma, personalizar a experiência e garantir segurança.</li>
-                  <li>Para fins estatísticos e analíticos, com dados preferencialmente agregados ou anonimizados.</li>
-                </ul>
-                <h3 className="text-foreground font-semibold">5. Compartilhamento de Dados</h3>
-                <p>Podemos compartilhar dados com provedores de serviços estritamente necessários à operação, observando medidas contratuais e de segurança. Não vendemos seus dados pessoais.</p>
-                <h3 className="text-foreground font-semibold">6. Cookies e Tecnologias Semelhantes</h3>
-                <p>Utilizamos cookies para manter sua sessão, lembrar preferências e analisar o uso. Você pode gerenciar cookies nas configurações do seu navegador.</p>
-                <h3 className="text-foreground font-semibold">7. Direitos do Titular</h3>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>Acesso, correção, anonimização ou exclusão de dados.</li>
-                  <li>Portabilidade e informação sobre compartilhamento.</li>
-                  <li>Revogação de consentimento e oposição ao tratamento, quando aplicável.</li>
-                </ul>
-                <h3 className="text-foreground font-semibold">8. Segurança</h3>
-                <p>Adotamos medidas técnicas e administrativas para proteger os dados contra acessos não autorizados, perdas e incidentes.</p>
-                <h3 className="text-foreground font-semibold">9. Retenção</h3>
-                <p>Os dados são mantidos pelo tempo necessário para cumprir as finalidades informadas ou exigências legais. Após esse período, serão eliminados ou anonimizados.</p>
-                <h3 className="text-foreground font-semibold">10. Transferências Internacionais</h3>
-                <p>Se houver transferência internacional de dados, garantimos salvaguardas adequadas conforme a legislação aplicável.</p>
-                <h3 className="text-foreground font-semibold">11. Contato</h3>
-                <p>Para exercer seus direitos ou tirar dúvidas, entre em contato pelo e-mail suporte@marketpro.com.</p>
-                <h3 className="text-foreground font-semibold">12. Atualizações desta Política</h3>
-                <p>Podemos atualizar esta Política periodicamente. A versão vigente será sempre a mais recente publicada na plataforma.</p>
+              <CardContent className="max-h-[70vh] overflow-y-auto space-y-4 text-sm text-muted-foreground">
+                <h3 className="text-foreground font-medium">1. Introducao</h3>
+                <p>Esta Politica descreve como a Konvexy coleta, utiliza e protege seus dados pessoais conforme a LGPD.</p>
+                <h3 className="text-foreground font-medium">2. Dados Coletados</h3>
+                <p>Coletamos dados de cadastro (nome, email), dados de uso e dados tecnicos (IP, navegador).</p>
+                <h3 className="text-foreground font-medium">3. Uso dos Dados</h3>
+                <p>Utilizamos para autenticacao, suporte, melhorias na plataforma e fins estatisticos.</p>
+                <h3 className="text-foreground font-medium">4. Compartilhamento</h3>
+                <p>Compartilhamos apenas com provedores essenciais. Nao vendemos seus dados.</p>
+                <h3 className="text-foreground font-medium">5. Seus Direitos</h3>
+                <p>Voce pode solicitar acesso, correcao ou exclusao de seus dados a qualquer momento.</p>
+                <h3 className="text-foreground font-medium">6. Seguranca</h3>
+                <p>Adotamos medidas tecnicas para proteger seus dados contra acessos nao autorizados.</p>
+                <h3 className="text-foreground font-medium">7. Contato</h3>
+                <p>Para exercer seus direitos, entre em contato pelo e-mail contato@konvexy.com.</p>
               </CardContent>
             </Card>
           </div>
