@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase-server'
 import { getUserActiveSubscription } from '@/lib/subscriptions'
 import { validateRequest } from '@/lib/api-security'
 import { RATE_LIMITS } from '@/lib/rate-limit'
+import { sanitizeInput, sanitizeEmail } from '@/lib/sanitize'
 
 export async function GET(request: NextRequest) {
   try {
@@ -78,14 +79,31 @@ export async function PATCH(request: NextRequest) {
 
     // Atualizar perfil
     const updates: any = {}
-    if (name) updates.name = name
-    if (email && email !== user.email) {
-      // Atualizar email no auth
-      const { error: emailError } = await supabase.auth.updateUser({ email })
+
+    if (name !== undefined) {
+      if (typeof name !== 'string') {
+        return NextResponse.json({ error: 'Nome inválido' }, { status: 400 })
+      }
+      const sanitizedName = sanitizeInput(name, { maxLength: 100, allowHtml: false, stripScripts: true })
+      if (sanitizedName.length < 2) {
+        return NextResponse.json({ error: 'Nome inválido' }, { status: 400 })
+      }
+      updates.name = sanitizedName
+    }
+
+    if (email !== undefined && email !== user.email) {
+      let cleanEmail: string
+      try {
+        cleanEmail = sanitizeEmail(email)
+      } catch {
+        return NextResponse.json({ error: 'Email inválido' }, { status: 400 })
+      }
+      // Atualizar email no auth (dispara confirmação via Supabase)
+      const { error: emailError } = await supabase.auth.updateUser({ email: cleanEmail })
       if (emailError) {
         return NextResponse.json({ error: 'Erro ao atualizar email' }, { status: 400 })
       }
-      updates.email = email
+      updates.email = cleanEmail
     }
 
     if (Object.keys(updates).length > 0) {

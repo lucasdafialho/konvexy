@@ -67,31 +67,60 @@ alter table public.subscriptions enable row level security;
 alter table public.generations enable row level security;
 
 -- Políticas de segurança para profiles
-create policy "Usuários podem ver seu próprio perfil"
+-- SELECT/UPDATE só na própria linha. Colunas sensíveis (plan,
+-- subscription_status, last_payment_id) são protegidas pelo trigger
+-- protect_profile_privileged_columns (RLS não filtra colunas).
+create policy "profiles_select_own"
   on public.profiles for select
+  to authenticated
   using (auth.uid() = id);
 
-create policy "Usuários podem atualizar seu próprio perfil"
+create policy "profiles_update_own"
   on public.profiles for update
-  using (auth.uid() = id);
+  to authenticated
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
+
+create policy "profiles_insert_self"
+  on public.profiles for insert
+  to authenticated
+  with check (auth.uid() = id);
 
 -- Políticas de segurança para subscriptions
-create policy "Usuários podem ver suas próprias assinaturas"
+-- Leitura própria; escrita SOMENTE via service_role (webhook/admin).
+create policy "subscriptions_select_own"
   on public.subscriptions for select
+  to authenticated
   using (auth.uid() = user_id);
-
-create policy "Usuários podem inserir suas próprias assinaturas"
-  on public.subscriptions for insert
-  with check (auth.uid() = user_id);
 
 -- Políticas de segurança para generations
-create policy "Usuários podem ver suas próprias gerações"
+create policy "generations_select_own"
   on public.generations for select
+  to authenticated
   using (auth.uid() = user_id);
 
-create policy "Usuários podem inserir suas próprias gerações"
+create policy "generations_insert_own"
   on public.generations for insert
+  to authenticated
   with check (auth.uid() = user_id);
+
+-- Trigger que congela colunas privilegiadas contra edição pelo usuário
+create or replace function public.protect_profile_privileged_columns()
+returns trigger as $$
+begin
+  if coalesce(auth.role(), '') <> 'service_role' then
+    new.plan                := old.plan;
+    new.subscription_status := old.subscription_status;
+    new.last_payment_id     := old.last_payment_id;
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists trg_protect_profile_columns on public.profiles;
+create trigger trg_protect_profile_columns
+  before update on public.profiles
+  for each row execute function public.protect_profile_privileged_columns();
 
 -- Função para criar perfil automaticamente após signup
 create or replace function public.handle_new_user()

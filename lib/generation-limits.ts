@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import { getSupabaseAdmin } from './supabase-admin'
-import { PLANS } from './mercadopago'
+import { PLANS } from './plans'
 import { validateUserPlan } from './subscriptions'
 
 export type GenerationType = 'ads' | 'copy' | 'funnel' | 'canvas'

@@ -7,6 +7,7 @@ import { sanitizeInput, sanitizeObject } from "@/lib/sanitize"
 import { removeMarkdownFormatting } from "@/lib/text-formatter"
 import { generateCopySchema, validateInput } from "@/lib/validators"
 import { sanitizeAIContent } from "@/lib/content-sanitizer"
+import { requireCSRF } from "@/lib/csrf"
 import secureLogger from "@/lib/logger"
 import { logSecurityEvent } from "@/lib/audit"
 
@@ -16,6 +17,12 @@ const FALLBACK_MODEL = "gemini-2.0-flash-lite"
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
   const userAgent = request.headers.get('user-agent') || 'unknown'
+
+  // CSRF (consistente com generate-ads/funnel/canvas)
+  const csrfCheck = requireCSRF(request.headers.get('x-csrf-token'))
+  if (!csrfCheck.valid) {
+    return NextResponse.json({ success: false, error: csrfCheck.error || 'Token CSRF inválido' }, { status: 403 })
+  }
 
   try {
     const user = await getUserFromRequest(request)

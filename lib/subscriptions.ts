@@ -1,5 +1,5 @@
 import { supabase, supabaseAdmin, type Subscription as DBSubscription } from './supabase'
-import { PLANS } from './mercadopago'
+import { PLANS } from './plans'
 
 export interface Subscription {
   id: string
@@ -59,7 +59,7 @@ export async function getUserSubscriptions(userId: string): Promise<Subscription
     return []
   }
 
-  return data.map(item => {
+  return data.map((item: any) => {
     const sub = item as unknown as DBSubscription
     return {
       id: sub.id,

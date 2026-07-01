@@ -28,11 +28,8 @@ export default function ResetPasswordPage() {
     // Verifica e processa o token de recuperação da URL
     const checkAndProcessRecoveryToken = async () => {
       try {
-        console.log("🔍 [RESET] Iniciando verificação de token...")
-        console.log("🔗 [RESET] URL completa:", window.location.href)
-        console.log("🔗 [RESET] Hash:", window.location.hash)
-
-        // Primeiro, verifica se há um hash fragment na URL (Supabase envia o token assim)
+        // Supabase envia o token de recuperação no hash fragment da URL.
+        // Nunca logar hash/URL/token — vaza credencial nos logs do navegador.
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
@@ -40,73 +37,40 @@ export default function ResetPasswordPage() {
         const errorParam = hashParams.get('error')
         const errorDescription = hashParams.get('error_description')
 
-        console.log("📝 [RESET] Parâmetros extraídos:", {
-          hasAccessToken: !!accessToken,
-          accessTokenPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'null',
-          hasRefreshToken: !!refreshToken,
-          type,
-          error: errorParam,
-          errorDescription
-        })
-
-        // Verifica se há erro na URL
         if (errorParam) {
-          console.error("❌ [RESET] Erro na URL:", errorParam, errorDescription)
           setError(errorDescription || "Link de recuperação inválido ou expirado.")
           return
         }
 
-        // Se há tokens na URL e é um recovery, define a sessão
+        // Limpa o hash da URL o quanto antes (evita token ficar exposto/no histórico)
         if (accessToken && type === 'recovery') {
-          console.log("🔄 [RESET] Tipo é recovery, definindo sessão...")
-
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken || '',
           })
 
-          console.log("📊 [RESET] Resposta do setSession:", {
-            hasData: !!data,
-            hasSession: !!data?.session,
-            hasUser: !!data?.user,
-            error: error?.message
-          })
+          window.history.replaceState(null, '', window.location.pathname)
 
           if (error) {
-            console.error("❌ [RESET] Erro ao definir sessão:", error)
             setError("Não foi possível processar o link de recuperação. Por favor, solicite um novo link.")
             return
           }
 
           if (data?.session) {
-            console.log("✅ [RESET] Sessão de recuperação definida com sucesso!")
             setIsValidSession(true)
-
-            // Limpa o hash da URL para evitar reprocessamento
-            window.history.replaceState(null, '', window.location.pathname)
             return
           }
         }
 
-        // Se não há tokens na URL, verifica se já existe uma sessão ativa
-        console.log("🔍 [RESET] Verificando sessão existente...")
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-
-        console.log("📊 [RESET] Sessão existente:", {
-          hasSession: !!session,
-          hasUser: !!session?.user,
-          error: sessionError?.message
-        })
+        // Sem token na URL: verifica se já há sessão ativa
+        const { data: { session } } = await supabase.auth.getSession()
 
         if (session) {
-          console.log("✅ [RESET] Sessão válida encontrada!")
           setIsValidSession(true)
         } else {
-          console.log("❌ [RESET] Nenhuma sessão válida encontrada")
           setError("Link de recuperação inválido ou expirado. Por favor, solicite um novo link.")
         }
-      } catch (err: any) {
-        console.error("❌ [RESET] Erro ao processar token:", err)
+      } catch {
         setError("Ocorreu um erro ao processar o link. Por favor, solicite um novo link.")
       }
     }
@@ -141,36 +105,23 @@ export default function ResetPasswordPage() {
     }
 
     try {
-      console.log("🔄 [RESET] Iniciando atualização de senha...")
-
       // Atualiza a senha usando Supabase
-      const { data, error: updateError } = await supabase.auth.updateUser({
+      const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword
       })
 
-      console.log("📊 [RESET] Resposta do updateUser:", {
-        hasData: !!data,
-        hasUser: !!data?.user,
-        error: updateError?.message
-      })
-
       if (updateError) {
-        console.error("❌ [RESET] Erro ao atualizar senha:", updateError)
         throw updateError
       }
 
-      console.log("✅ [RESET] Senha atualizada com sucesso!")
       setSuccess(true)
       setIsLoading(false)
 
       // Redireciona para o login imediatamente após mostrar sucesso
       setTimeout(() => {
-        console.log("🔀 [RESET] Redirecionando para login...")
         router.push("/login")
       }, 1500)
     } catch (err: any) {
-      console.error("❌ [RESET] Erro ao redefinir senha:", err)
-
       // Mensagens de erro específicas
       let errorMessage = "Erro ao redefinir senha. Tente novamente."
 

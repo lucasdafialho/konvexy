@@ -1,10 +1,22 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import secureLogger from './logger'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy: não instanciar no carregamento do módulo (evita crash de cold start
+// e falha de build quando as envs não estão presentes). Retorna null se não
+// configurado — auditoria nunca deve derrubar o fluxo principal.
+let _supabase: SupabaseClient | null = null
+let _initialized = false
+
+function getClient(): SupabaseClient | null {
+  if (_initialized) return _supabase
+  _initialized = true
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (url && key) {
+    _supabase = createClient(url, key)
+  }
+  return _supabase
+}
 
 export type SecurityEventType =
   | 'login'
@@ -45,6 +57,8 @@ export async function logSecurityEvent(event: SecurityEvent): Promise<void> {
     })
 
     // Tentar salvar no banco (não bloquear se falhar)
+    const supabase = getClient()
+    if (!supabase) return
     await supabase.from('security_audit_log').insert({
       event_type: type,
       user_id: userId,
@@ -70,6 +84,9 @@ export async function detectSuspiciousLogin(
 ): Promise<{ suspicious: boolean; reason?: string }> {
   try {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+
+    const supabase = getClient()
+    if (!supabase) return { suspicious: false }
 
     // Buscar tentativas de login na última hora
     const { data: attempts } = await supabase
@@ -118,6 +135,9 @@ export async function getUserActivityHistory(
   limit = 50
 ): Promise<any[]> {
   try {
+    const supabase = getClient()
+    if (!supabase) return []
+
     const { data } = await supabase
       .from('security_audit_log')
       .select('*')
@@ -141,6 +161,9 @@ export async function detectAnomalies(userId: string): Promise<{
 }> {
   try {
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+
+    const supabase = getClient()
+    if (!supabase) return { hasAnomalies: false, anomalies: [] }
 
     const { data: recentActivity } = await supabase
       .from('security_audit_log')

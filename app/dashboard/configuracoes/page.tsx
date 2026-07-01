@@ -422,7 +422,7 @@ export default function ConfiguracoesPage() {
                     <p className="text-sm text-slate-600">
                       {settings?.profile.plan !== 'free' ? (
                         <>
-                          {getPlanPrice(settings.profile.plan)}/mês
+                          {settings && getPlanPrice(settings.profile.plan)}/mês
                           {settings?.subscription && getDaysUntilExpiration() !== null && ` • Renovação em ${getDaysUntilExpiration()} dias`}
                         </>
                       ) : (

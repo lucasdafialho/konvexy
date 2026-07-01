@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "./use-auth"
-import { PLANS } from "@/lib/mercadopago"
+import { PLANS } from "@/lib/plans"
 import { supabase } from "@/lib/supabase"
 
 // Tipos de geração disponíveis

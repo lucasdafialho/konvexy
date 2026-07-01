@@ -1,5 +1,11 @@
 import crypto from 'crypto'
 
+// CSRF_SECRET DEVE ser fixo em produção. Sem ele, cada instância serverless
+// gera um segredo próprio → tokens emitidos por uma instância falham em outra.
+if (!process.env.CSRF_SECRET && process.env.NODE_ENV === 'production') {
+  console.error('🚨 [CSRF] CSRF_SECRET não configurado em produção — tokens CSRF vão falhar de forma intermitente entre instâncias. Configure a variável de ambiente.')
+}
+
 const SECRET = process.env.CSRF_SECRET || crypto.randomBytes(32).toString('hex')
 const TOKEN_EXPIRY = 60 * 60 * 1000 // 1 hora
 

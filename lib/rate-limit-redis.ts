@@ -9,12 +9,22 @@ try {
 
   if (redisUrl) {
     redis = new Redis(redisUrl, {
-      maxRetriesPerRequest: 3,
+      // Serverless-friendly: falhar rápido em vez de segurar a request do usuário.
+      maxRetriesPerRequest: 1,
       enableReadyCheck: true,
+      // Não enfileirar comandos quando desconectado — retorna erro na hora
+      // e o rate limiter cai em fail-open sem travar a resposta.
+      enableOfflineQueue: false,
+      connectTimeout: 5000,
+      commandTimeout: 2000,
       retryStrategy(times) {
-        const delay = Math.min(times * 50, 2000)
-        return delay
-      }
+        // Para de tentar reconectar após ~10 tentativas (evita loop infinito)
+        if (times > 10) return null
+        return Math.min(times * 50, 2000)
+      },
+      reconnectOnError() {
+        return false
+      },
     })
 
     redis.on('error', (err) => {
