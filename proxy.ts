@@ -2,15 +2,16 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-export async function middleware(request: NextRequest) {
+// Next 16: convenção `proxy` (antes `middleware`).
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
-  
+
   // Permitir acesso livre a páginas públicas e API
   const publicPaths = ['/', '/login', '/register', '/legal', '/guia-rapido']
   const isPublicPath = publicPaths.some(path => pathname === path || pathname.startsWith(path))
   const isApiRoute = pathname.startsWith('/api')
   const isAuthCallback = pathname.startsWith('/auth/callback')
-  
+
   if (isPublicPath || isApiRoute || isAuthCallback) {
     return NextResponse.next()
   }
@@ -50,7 +51,7 @@ export async function middleware(request: NextRequest) {
 
     return supabaseResponse
   } catch (error) {
-    console.error('[MIDDLEWARE] Erro:', error)
+    console.error('[PROXY] Erro:', error)
     // Em caso de erro, permite o acesso e deixa o cliente lidar com a autenticação
     return NextResponse.next()
   }

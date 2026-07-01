@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    // Lint ainda ignorado no build (ruidoso). Rode `next lint` manualmente.
-    ignoreDuringBuilds: true,
-  },
+  // Next 16 removeu a chave `eslint` do config. Lint roda via `next lint` manual.
   typescript: {
     // Checagem de tipo religada — projeto typecheck limpo em 2026-07-01.
     ignoreBuildErrors: false,

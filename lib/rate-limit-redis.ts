@@ -9,6 +9,8 @@ try {
 
   if (redisUrl) {
     redis = new Redis(redisUrl, {
+      // Não conectar no import (build/static-gen). Conecta só no 1º comando.
+      lazyConnect: true,
       // Serverless-friendly: falhar rápido em vez de segurar a request do usuário.
       maxRetriesPerRequest: 1,
       enableReadyCheck: true,
